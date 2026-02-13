@@ -4,13 +4,13 @@
 
 ## 使用
 
-- 直接用浏览器打开 `nav.html`
+- 直接用浏览器打开 `index.html`
 - 或部署到 GitHub Pages 在线访问
 
 ## 如何贡献
 
 1. Fork 仓库
-2. 编辑 `nav.html`
+2. 编辑 `index.html`
 3. 提交 PR
 
 详细说明见 `CONTRIBUTING.md`。
