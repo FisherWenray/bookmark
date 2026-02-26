@@ -34936,19 +34936,38 @@
       document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
       content.querySelectorAll('.bk-card, .sub-section, .tier-group').forEach(el => el.classList.add('search-hidden'));
 
+      const queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      const highlightedSubTitles = new Set();
+
       content.querySelectorAll('.bk-card').forEach(card => {
         const name = card.querySelector('.bk-name');
         if (!name) return;
         const text = name.textContent.toLowerCase();
         const url = (card.getAttribute('href') || '').toLowerCase();
+        const sectionTitles = [];
+        let section = card.closest('.sub-section');
+        while (section) {
+          const subTitle = section.querySelector(':scope > .sub-header .sub-title');
+          if (subTitle) sectionTitles.push(subTitle.textContent.toLowerCase());
+          section = section.parentElement.closest('.sub-section');
+        }
+        const subTitleText = sectionTitles.join(' ');
 
-        if (text.includes(query) || url.includes(query)) {
+        if (text.includes(query) || url.includes(query) || subTitleText.includes(query)) {
           card.classList.remove('search-hidden');
-          const regex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-          name.innerHTML = name.textContent.replace(regex, '<mark>$1</mark>');
+          name.innerHTML = name.textContent.replace(queryRegex, '<mark>$1</mark>');
           let parent = card.closest('.sub-section');
           while (parent) {
             parent.classList.remove('search-hidden', 'collapsed');
+            const parentTitle = parent.querySelector(':scope > .sub-header .sub-title');
+            if (
+              parentTitle &&
+              !highlightedSubTitles.has(parentTitle) &&
+              parentTitle.textContent.toLowerCase().includes(query)
+            ) {
+              parentTitle.innerHTML = parentTitle.textContent.replace(queryRegex, '<mark>$1</mark>');
+              highlightedSubTitles.add(parentTitle);
+            }
             parent = parent.parentElement.closest('.sub-section');
           }
           let panel = card.closest('.panel');
