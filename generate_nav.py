@@ -167,7 +167,7 @@ def render_bookmark_grid(bookmarks: list) -> str:
         domain = get_domain(url)
         favicon = get_favicon_url(url)
 
-        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card" title="{esc(title)}">
+        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener nofollow" class="bk-card" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>{esc(title[:1])}</text></svg>'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
@@ -224,7 +224,7 @@ def render_section_items(items: list, depth: int) -> str:
                 continue
             title = item.get("title", "")
             favicon = get_favicon_url(url)
-            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card loose" title="{esc(title)}">
+            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener nofollow" class="bk-card loose" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
