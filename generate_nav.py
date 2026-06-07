@@ -226,15 +226,28 @@ def generate_nav_html(bookmarks: list) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>书签导航 - 高效的网址收藏与发现工具</title>
-  <meta name="description" content="精选收录各类优质网站、工具、开发文档与资源，为您提供高效便捷的上网导航体验。">
-  <meta name="keywords" content="书签,网址导航,开发工具,网站收藏">
-  <meta property="og:title" content="书签导航 - 你的专属网址库">
-  <meta property="og:description" content="精选海量优质网站资源，快速定位你需要的工具。">
+  <title>数字驾驶舱 - 精选高效工具与优质资源导航</title>
+  <meta name="description" content="一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页，支持快捷搜索，一站式满足数字生产力需求。">
+  <meta name="keywords" content="导航网站,书签导航,工具大全,资源搜索,数字驾驶舱,个人主页,wenyaoyefei">
+  <meta property="og:title" content="数字驾驶舱 - 精选高效工具与优质资源导航">
+  <meta property="og:description" content="收录数千个精选网站与高效工具的个人导航，快速查找各类数字资源。">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://yourdomain.com/logo.png">
+  <meta property="og:image" content="https://nav.wenyaoyefei.com/logo.png">
+  <meta property="og:url" content="https://nav.wenyaoyefei.com/">
+  <link rel="canonical" href="https://nav.wenyaoyefei.com/" />
+  <link rel="icon" href="logo.png" type="image/png">
   <style>
-  <style>
+    .seo-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
     * {
@@ -733,8 +746,10 @@ def generate_nav_html(bookmarks: list) -> str:
       transform: translateY(-2px);
     }}
   </style>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="7f657995-bcbb-47bc-aac7-6445d433598c"></script>
 </head>
 <body>
+  <h1 class="seo-hidden">数字驾驶舱 - 精选高效工具与优质资源导航大全</h1>
 
   <nav class="sidebar">
     <h1 class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="书签导航 Logo"></h1>
