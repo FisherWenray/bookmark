@@ -403,6 +403,15 @@ def generate_nav_html(bookmarks: list) -> str:
   <meta property="og:url" content="https://nav.wenyaoyefei.com/">
   <link rel="canonical" href="https://nav.wenyaoyefei.com/" />
   <link rel="icon" href="logo.png" type="image/png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "数字驾驶舱 - 精选高效工具与优质资源导航",
+    "url": "https://nav.wenyaoyefei.com/",
+    "description": "一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页，一站式满足数字生产力需求。"
+  }
+  </script>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
