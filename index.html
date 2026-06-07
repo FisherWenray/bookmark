@@ -12,19 +12,32 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://nav.wenyaoyefei.com/">
   <meta property="og:image" content="https://nav.wenyaoyefei.com/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="数字驾驶舱 - 精选高效工具与优质资源导航">
+  <meta name="twitter:description" content="收录数千个精选网站与高效工具的个人导航，快速查找各类数字资源。">
+  <meta name="twitter:image" content="https://nav.wenyaoyefei.com/logo.png">
+  <meta name="author" content="Wenray">
+  <meta name="theme-color" content="#0f141b">
   <link rel="canonical" href="https://nav.wenyaoyefei.com/" />
   <link rel="icon" href="logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "数字驾驶舱 - 精选高效工具与优质资源导航",
     "url": "https://nav.wenyaoyefei.com/",
-    "description": "一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页。"
+    "description": "一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页。",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://nav.wenyaoyefei.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
   }
   </script>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
     * {
       margin: 0;
@@ -21633,6 +21646,16 @@
         searchInput.blur();
       }
     });
+
+    // ── URL 参数搜索支持（配合 JSON-LD SearchAction）──
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q && searchInput) {
+        searchInput.value = q;
+        searchInput.dispatchEvent(new Event('input'));
+      }
+    })();
   </script>
 
   <footer class="site-footer">
