@@ -408,6 +408,29 @@
       margin: 3px;
     }
 
+    .group-sub-category {
+      margin-bottom: 28px;
+    }
+
+    .group-sub-category-title {
+      font-family: "Noto Serif SC", "Kaiti SC", serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffffff;
+      padding-left: 12px;
+      border-left: 4px solid var(--secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0.5px;
+    }
+
+    .group-sub-category-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .search-hidden {
       display: none !important;
     }
@@ -513,18 +536,15 @@
 <div class="nav-item " data-panel="panel-2" onclick="switchPanel(this)">资源搜索</div>
 <div class="nav-item " data-panel="panel-3" onclick="switchPanel(this)">在线工具</div>
 <div class="nav-item " data-panel="panel-4" onclick="switchPanel(this)">在线办公</div>
-<div class="nav-item " data-panel="panel-5" onclick="switchPanel(this)">哲学心理</div>
-<div class="nav-item " data-panel="panel-6" onclick="switchPanel(this)">社会科学</div>
-<div class="nav-item " data-panel="panel-7" onclick="switchPanel(this)">英语学习</div>
-<div class="nav-item " data-panel="panel-8" onclick="switchPanel(this)">自然科学</div>
-<div class="nav-item " data-panel="panel-9" onclick="switchPanel(this)">科技数码</div>
-<div class="nav-item " data-panel="panel-10" onclick="switchPanel(this)">软件开发</div>
-<div class="nav-item " data-panel="panel-11" onclick="switchPanel(this)">平面设计</div>
-<div class="nav-item " data-panel="panel-12" onclick="switchPanel(this)">电影艺术</div>
-<div class="nav-item " data-panel="panel-13" onclick="switchPanel(this)">音乐视频</div>
-<div class="nav-item " data-panel="panel-14" onclick="switchPanel(this)">娱乐休闲</div>
-<div class="nav-item " data-panel="panel-15" onclick="switchPanel(this)">文学知识</div>
-<div class="nav-item " data-panel="panel-16" onclick="switchPanel(this)">生活频道</div>
+<div class="nav-item " data-panel="panel-5" onclick="switchPanel(this)">基础学科</div>
+<div class="nav-item " data-panel="panel-6" onclick="switchPanel(this)">科技数码</div>
+<div class="nav-item " data-panel="panel-7" onclick="switchPanel(this)">软件开发</div>
+<div class="nav-item " data-panel="panel-8" onclick="switchPanel(this)">平面设计</div>
+<div class="nav-item " data-panel="panel-9" onclick="switchPanel(this)">电影艺术</div>
+<div class="nav-item " data-panel="panel-10" onclick="switchPanel(this)">音乐视频</div>
+<div class="nav-item " data-panel="panel-11" onclick="switchPanel(this)">娱乐休闲</div>
+<div class="nav-item " data-panel="panel-12" onclick="switchPanel(this)">文学知识</div>
+<div class="nav-item " data-panel="panel-13" onclick="switchPanel(this)">生活频道</div>
   </div>
 
   <div class="main">
@@ -6446,7 +6466,9 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-5"><section class="tier-group">
+<div class="panel " id="panel-5"><div class="group-sub-category">
+  <div class="group-sub-category-title">哲学心理</div>
+  <div class="group-sub-category-content"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -7284,7 +7306,10 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-6"><section class="tier-group">
+</div>
+<div class="group-sub-category">
+  <div class="group-sub-category-title">社会科学</div>
+  <div class="group-sub-category-content"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -8586,7 +8611,10 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-7"><section class="tier-group">
+</div>
+<div class="group-sub-category">
+  <div class="group-sub-category-title">英语学习</div>
+  <div class="group-sub-category-content"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -9709,7 +9737,10 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-8"><section class="tier-group">
+</div>
+<div class="group-sub-category">
+  <div class="group-sub-category-title">自然科学</div>
+  <div class="group-sub-category-content"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -10997,7 +11028,8 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-9"><section class="tier-group">
+</div></div>
+<div class="panel " id="panel-6"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -12145,7 +12177,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-10"><section class="tier-group">
+<div class="panel " id="panel-7"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -14081,7 +14113,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-11"><section class="tier-group">
+<div class="panel " id="panel-8"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -15679,7 +15711,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-12"><section class="tier-group">
+<div class="panel " id="panel-9"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -16879,7 +16911,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-13"><section class="tier-group">
+<div class="panel " id="panel-10"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -18185,7 +18217,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-14"><section class="tier-group">
+<div class="panel " id="panel-11"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -19458,7 +19490,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-15"><section class="tier-group">
+<div class="panel " id="panel-12"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -20600,7 +20632,7 @@
 </a></div></div>
 </div></div>
 </section></div>
-<div class="panel " id="panel-16"><section class="tier-group">
+<div class="panel " id="panel-13"><section class="tier-group">
   <div class="tier-group-body"><div class="sub-section depth-0 ">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -21366,7 +21398,7 @@
 
       // 搜索模式：显示所有面板
       document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
-      content.querySelectorAll('.bk-card, .sub-section, .tier-group').forEach(el => el.classList.add('search-hidden'));
+      content.querySelectorAll('.bk-card, .sub-section, .tier-group, .group-sub-category').forEach(el => el.classList.add('search-hidden'));
 
       const queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
       const highlightedSubTitles = new Set();
@@ -21406,6 +21438,8 @@
           if (panel) panel.classList.remove('search-hidden');
           let tier = card.closest('.tier-group');
           if (tier) tier.classList.remove('search-hidden');
+          let groupSub = card.closest('.group-sub-category');
+          if (groupSub) groupSub.classList.remove('search-hidden');
         }
       });
     });

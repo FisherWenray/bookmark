@@ -270,12 +270,45 @@ def render_section_content(children: list, depth: int = 0) -> str:
 def generate_nav_html(bookmarks: list) -> str:
     level1 = get_level1_folders(bookmarks)
 
+    # 定义分类映射：将特定一级目录合并为“基础学科”
+    GROUP_MAPPING = {
+        "哲学心理": "基础学科",
+        "社会科学": "基础学科",
+        "英语学习": "基础学科",
+        "自然科学": "基础学科",
+    }
+
+    grouped_level1 = []
+    seen_groups = {}  # group_name -> index in grouped_level1
+
+    for item in level1:
+        if not isinstance(item, dict) or "folder" not in item:
+            grouped_level1.append(item)
+            continue
+        
+        folder_name = item["folder"]
+        if folder_name in GROUP_MAPPING:
+            group_name = GROUP_MAPPING[folder_name]
+            if group_name not in seen_groups:
+                group_item = {
+                    "folder": group_name,
+                    "is_group": True,
+                    "sub_folders": [item]
+                }
+                seen_groups[group_name] = len(grouped_level1)
+                grouped_level1.append(group_item)
+            else:
+                idx_pos = seen_groups[group_name]
+                grouped_level1[idx_pos]["sub_folders"].append(item)
+        else:
+            grouped_level1.append(item)
+
     # 提取一级文件夹
     nav_items = []
     panels = []
 
     idx = 0
-    for item in level1:
+    for item in grouped_level1:
         if not isinstance(item, dict):
             continue
         if "folder" not in item:
@@ -284,7 +317,6 @@ def generate_nav_html(bookmarks: list) -> str:
             continue
 
         folder_name = item["folder"]
-        children = item.get("children", [])
         panel_id = f"panel-{idx}"
         active = "active" if idx == 0 else ""
 
@@ -294,7 +326,23 @@ def generate_nav_html(bookmarks: list) -> str:
         )
 
         # 右侧面板
-        content_html = render_section_content(children, depth=0)
+        if item.get("is_group"):
+            content_parts = []
+            for sub in item["sub_folders"]:
+                sub_name = sub["folder"]
+                sub_children = sub.get("children", [])
+                sub_content = render_section_content(sub_children, depth=0)
+                if not sub_content.strip():
+                    continue
+                content_parts.append(f'''<div class="group-sub-category">
+  <div class="group-sub-category-title">{esc(sub_name)}</div>
+  <div class="group-sub-category-content">{sub_content}</div>
+</div>''')
+            content_html = "\n".join(content_parts)
+        else:
+            children = item.get("children", [])
+            content_html = render_section_content(children, depth=0)
+
         panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
         idx += 1
 
@@ -711,6 +759,29 @@ def generate_nav_html(bookmarks: list) -> str:
       margin: 3px;
     }
 
+    .group-sub-category {
+      margin-bottom: 28px;
+    }
+
+    .group-sub-category-title {
+      font-family: "Noto Serif SC", "Kaiti SC", serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffffff;
+      padding-left: 12px;
+      border-left: 4px solid var(--secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0.5px;
+    }
+
+    .group-sub-category-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .search-hidden {
       display: none !important;
     }
@@ -868,7 +939,7 @@ def generate_nav_html(bookmarks: list) -> str:
 
       // 搜索模式：显示所有面板
       document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
-      content.querySelectorAll('.bk-card, .sub-section, .tier-group').forEach(el => el.classList.add('search-hidden'));
+      content.querySelectorAll('.bk-card, .sub-section, .tier-group, .group-sub-category').forEach(el => el.classList.add('search-hidden'));
 
       const queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')', 'gi');
       const highlightedSubTitles = new Set();
@@ -908,6 +979,8 @@ def generate_nav_html(bookmarks: list) -> str:
           if (panel) panel.classList.remove('search-hidden');
           let tier = card.closest('.tier-group');
           if (tier) tier.classList.remove('search-hidden');
+          let groupSub = card.closest('.group-sub-category');
+          if (groupSub) groupSub.classList.remove('search-hidden');
         }
       });
     });
