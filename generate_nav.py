@@ -272,96 +272,99 @@ def render_section_content(children: list, depth: int = 0) -> str:
 def generate_nav_html(bookmarks: list) -> str:
     level1 = get_level1_folders(bookmarks)
 
-    # 定义分类映射：将特定一级目录合并为“基础学科”
+    # 定义分类映射：将特定一级目录合并为“基础学科”与“音乐.电影.读书”
     GROUP_MAPPING = {
         "哲学心理": "基础学科",
         "社会科学": "基础学科",
         "英语学习": "基础学科",
         "自然科学": "基础学科",
+        "电影艺术": "音乐.电影.读书",
+        "音乐视频": "音乐.电影.读书",
+        "文学知识": "音乐.电影.读书",
     }
+
+    # 按照 GROUP_MAPPING 对 level1 进行预分组排重，使同组项目在侧边栏连续排列
+    reordered_level1 = []
+    group_contents = {}  # group_name -> list of original items
+    
+    for item in level1:
+        if not isinstance(item, dict) or "folder" not in item or is_separator(item):
+            reordered_level1.append(item)
+            continue
+            
+        folder_name = item["folder"]
+        group_name = GROUP_MAPPING.get(folder_name)
+        
+        if group_name:
+            if group_name not in group_contents:
+                group_contents[group_name] = [item]
+                # 用占位符标记该分组在侧边栏的插入位置（保留第一个成员的原始顺序）
+                reordered_level1.append({"is_group_placeholder": True, "group_name": group_name})
+            else:
+                group_contents[group_name].append(item)
+        else:
+            reordered_level1.append(item)
 
     # 提取一级文件夹
     nav_items = []
     panels = []
 
-    # 追踪当前所在的侧边栏分组
-    current_group_name = None
-    group_items_html = []
-
     idx = 0
-    for item in level1:
+    for item in reordered_level1:
         if not isinstance(item, dict):
             continue
-        if "folder" not in item:
-            continue
-        if is_separator(item):
-            continue
-
-        folder_name = item["folder"]
-        children = item.get("children", [])
-        panel_id = f"panel-{idx}"
-        active = "active" if idx == 0 else ""
-
-        # 生成右侧面板内容（保留各个一级文件夹的独立内容）
-        content_html = render_section_content(children, depth=0)
-        panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
-
-        # 检查是否属于某个侧边栏分组
-        group_name = GROUP_MAPPING.get(folder_name)
-
-        if group_name:
-            if current_group_name != group_name:
-                # 如果遇到新的分组，且之前有未闭合的分组，先闭合它
-                if current_group_name is not None:
-                    nav_items.append(f'''<div class="nav-group">
-  <div class="nav-group-header" onclick="toggleNavGroup(this)">
-    <span class="group-arrow">▼</span>
-    <span>{esc(current_group_name)}</span>
-  </div>
-  <div class="nav-group-items">
-    {"".join(group_items_html)}
-  </div>
-</div>''')
-                    group_items_html = []
-                current_group_name = group_name
             
-            # 添加子项导航
-            group_items_html.append(
-                f'<div class="nav-item sub-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>\n'
-            )
-        else:
-            # 如果从分组里走出来，先闭合之前的分组
-            if current_group_name is not None:
-                nav_items.append(f'''<div class="nav-group">
+        if item.get("is_group_placeholder"):
+            group_name = item["group_name"]
+            sub_folders = group_contents[group_name]
+            
+            group_items_html = []
+            for sub in sub_folders:
+                sub_name = sub["folder"]
+                sub_children = sub.get("children", [])
+                panel_id = f"panel-{idx}"
+                active = "active" if idx == 0 else ""
+                
+                # 生成右侧面板内容
+                content_html = render_section_content(sub_children, depth=0)
+                panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
+                
+                # 生成侧边栏子项
+                group_items_html.append(
+                    f'<div class="nav-item sub-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(sub_name)}</div>\n'
+                )
+                idx += 1
+                
+            # 将该分组以折叠框形式放入侧边栏
+            nav_items.append(f'''<div class="nav-group">
   <div class="nav-group-header" onclick="toggleNavGroup(this)">
     <span class="group-arrow">▼</span>
-    <span>{esc(current_group_name)}</span>
+    <span>{esc(group_name)}</span>
   </div>
   <div class="nav-group-items">
     {"".join(group_items_html)}
   </div>
 </div>''')
-                current_group_name = None
-                group_items_html = []
-
+        else:
+            if "folder" not in item:
+                continue
+            if is_separator(item):
+                continue
+                
+            folder_name = item["folder"]
+            children = item.get("children", [])
+            panel_id = f"panel-{idx}"
+            active = "active" if idx == 0 else ""
+            
+            # 生成右侧面板内容
+            content_html = render_section_content(children, depth=0)
+            panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
+            
             # 正常的一级导航项
             nav_items.append(
                 f'<div class="nav-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>\n'
             )
-
-        idx += 1
-
-    # 循环结束后，如果有未闭合的分组，进行闭合
-    if current_group_name is not None:
-        nav_items.append(f'''<div class="nav-group">
-  <div class="nav-group-header" onclick="toggleNavGroup(this)">
-    <span class="group-arrow">▼</span>
-    <span>{esc(current_group_name)}</span>
-  </div>
-  <div class="nav-group-items">
-    {"".join(group_items_html)}
-  </div>
-</div>''')
+            idx += 1
 
     nav_html = "".join(nav_items)
     panels_html = "\n".join(panels)
