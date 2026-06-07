@@ -770,12 +770,12 @@ def generate_nav_html(bookmarks: list) -> str:
         min-height: calc(100vh - 120px);
 
     /* 增加 search result active 样式 */
-    .bk-card.active-focus {{
+    .bk-card.active-focus {
       background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.42), rgba(var(--primary-rgb), 0.24));
       border-color: rgba(var(--primary-rgb), 0.86);
       box-shadow: 0 10px 18px rgba(0, 0, 0, 0.32);
       transform: translateY(-2px);
-    }}
+    }
   </style>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="7f657995-bcbb-47bc-aac7-6445d433598c"></script>
 </head>
@@ -806,89 +806,89 @@ def generate_nav_html(bookmarks: list) -> str:
     const searchInput = document.getElementById("searchInput");
     let currentPanelIdx = 0;
     
-    function escapeHtml(unsafe) {{
+    function escapeHtml(unsafe) {
         return (unsafe || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }}
+    }
 
-    function renderBookmarkGrid(items) {{
+    function renderBookmarkGrid(items) {
         let html = "";
         let currentGroupLabel = null;
         let currentGroupItems = [];
 
-        function flushGroup() {{
+        function flushGroup() {
             if (currentGroupItems.length === 0) return;
-            if (currentGroupLabel) {{
-                html += `<div class="grid-group-label">${{escapeHtml(currentGroupLabel)}}</div>`;
-            }}
-            html += `<div class="bk-grid">${{currentGroupItems.join("")}}</div>`;
+            if (currentGroupLabel) {
+                html += `<div class="grid-group-label">${escapeHtml(currentGroupLabel)}</div>`;
+            }
+            html += `<div class="bk-grid">${currentGroupItems.join("")}</div>`;
             currentGroupItems = [];
             currentGroupLabel = null;
-        }}
+        }
 
-        for (let item of items) {{
-            if (item.type === "separator") {{
+        for (let item of items) {
+            if (item.type === "separator") {
                 flushGroup();
                 if (item.label) currentGroupLabel = item.label;
-            }} else if (item.type === "link") {{
+            } else if (item.type === "link") {
                 currentGroupItems.push(`
-                    <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card" title="${{escapeHtml(item.title)}}">
-                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${{escapeHtml(item.title.charAt(0))}}</text></svg>'">
-                        <span class="bk-name">${{escapeHtml(item.title)}}</span>
+                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener external nofollow" class="bk-card" title="${escapeHtml(item.title)}">
+                        <img src="${escapeHtml(item.favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${escapeHtml(item.title.charAt(0))}</text></svg>'">
+                        <span class="bk-name">${escapeHtml(item.title)}</span>
                     </a>
                 `);
-            }}
-        }}
+            }
+        }
         flushGroup();
         return html;
-    }}
+    }
 
-    function renderSectionItems(items, depth) {{
+    function renderSectionItems(items, depth) {
         let html = "";
-        for (let item of items) {{
+        for (let item of items) {
             if (item.type === "separator") continue;
             
-            if (item.type === "folder") {{
+            if (item.type === "folder") {
                 let collapsed = depth === 0 ? "" : "collapsed";
-                if (item.is_leaf) {{
+                if (item.is_leaf) {
                     let gridHtml = renderBookmarkGrid(item.children);
                     if (!gridHtml) continue;
                     let bkCount = item.children.filter(c => c.type === "link").length;
                     html += `
-                        <div class="sub-section depth-${{depth}} ${{collapsed}}">
+                        <div class="sub-section depth-${depth} ${collapsed}">
                             <div class="sub-header" onclick="toggleSub(this)">
                                 <span class="arrow">▶</span>
-                                <h3 class="sub-title">${{escapeHtml(item.folder)}}</h3>
-                                <span class="sub-count">${{bkCount}}</span>
+                                <h3 class="sub-title">${escapeHtml(item.folder)}</h3>
+                                <span class="sub-count">${bkCount}</span>
                             </div>
-                            <div class="sub-body">${{gridHtml}}</div>
+                            <div class="sub-body">${gridHtml}</div>
                         </div>
                     `;
-                }} else {{
+                } else {
                     let inner = renderSectionContent(item.children, depth + 1);
                     if (!inner.trim()) continue;
                     html += `
-                        <div class="sub-section depth-${{depth}} ${{collapsed}}">
+                        <div class="sub-section depth-${depth} ${collapsed}">
                             <div class="sub-header" onclick="toggleSub(this)">
                                 <span class="arrow">▶</span>
-                                <h3 class="sub-title">${{escapeHtml(item.folder)}}</h3>
+                                <h3 class="sub-title">${escapeHtml(item.folder)}</h3>
                             </div>
-                            <div class="sub-body">${{inner}}</div>
+                            <div class="sub-body">${inner}</div>
                         </div>
                     `;
-                }}
-            }} else if (item.type === "link") {{
+                }
+            } else if (item.type === "link") {
                 html += `
-                    <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card loose" title="${{escapeHtml(item.title)}}">
-                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.style.display='none'">
-                        <span class="bk-name">${{escapeHtml(item.title)}}</span>
+                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener external nofollow" class="bk-card loose" title="${escapeHtml(item.title)}">
+                        <img src="${escapeHtml(item.favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span class="bk-name">${escapeHtml(item.title)}</span>
                     </a>
                 `;
-            }}
-        }}
+            }
+        }
         return html;
-    }}
+    }
 
-    function renderSectionContent(children, depth) {{
+    function renderSectionContent(children, depth) {
         if (depth !== 0) return renderSectionItems(children, depth);
         
         let hasSeparator = children.some(c => c.type === "separator");
@@ -898,114 +898,114 @@ def generate_nav_html(bookmarks: list) -> str:
         let bufferItems = [];
         let pendingLabel = "";
 
-        for (let item of children) {{
-            if (item.type === "separator") {{
-                if (bufferItems.length > 0) {{
-                    grouped.push({{label: pendingLabel, items: bufferItems}});
+        for (let item of children) {
+            if (item.type === "separator") {
+                if (bufferItems.length > 0) {
+                    grouped.push({label: pendingLabel, items: bufferItems});
                     bufferItems = [];
-                }}
+                }
                 pendingLabel = item.label;
                 continue;
-            }}
+            }
             bufferItems.push(item);
-        }}
-        if (bufferItems.length > 0) {{
-            grouped.push({{label: pendingLabel, items: bufferItems}});
-        }}
+        }
+        if (bufferItems.length > 0) {
+            grouped.push({label: pendingLabel, items: bufferItems});
+        }
 
         let output = "";
-        for (let group of grouped) {{
+        for (let group of grouped) {
             let groupHtml = renderSectionItems(group.items, depth);
             if (!groupHtml.trim()) continue;
-            output += `<section class="tier-group"><div class="tier-group-body">${{groupHtml}}</div></section>`;
-        }}
+            output += `<section class="tier-group"><div class="tier-group-body">${groupHtml}</div></section>`;
+        }
         return output;
-    }}
+    }
 
     // 缓存渲染结果
-    const panelCache = {{}};
+    const panelCache = {};
 
-    function switchPanel(el, idx) {{
+    function switchPanel(el, idx) {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
         
         currentPanelIdx = idx;
         
-        if (panelCache[idx]) {{
+        if (panelCache[idx]) {
             contentDiv.innerHTML = panelCache[idx];
-        }} else {{
+        } else {
             let data = window.bookmarkData[idx];
-            if (data) {{
-                let html = `<section class="panel active" id="${{data.id}}">` + renderSectionContent(data.children, 0) + `</section>`;
+            if (data) {
+                let html = `<section class="panel active" id="${data.id}">` + renderSectionContent(data.children, 0) + `</section>`;
                 panelCache[idx] = html;
                 contentDiv.innerHTML = html;
-            }}
-        }}
+            }
+        }
         contentDiv.scrollTop = 0;
-    }}
+    }
 
-    function toggleSub(header) {{
+    function toggleSub(header) {
         header.parentElement.classList.toggle('collapsed');
-    }}
+    }
 
     // ── 搜索引擎与按键导航 ──
     let searchResults = [];
     let focusedIndex = -1;
 
-    function renderSearchResults(results, query) {{
-        if (results.length === 0) {{
+    function renderSearchResults(results, query) {
+        if (results.length === 0) {
             contentDiv.innerHTML = `<div style="padding: 20px; color: var(--text-soft); text-align: center;">没有找到符合条件的书签 😅</div>`;
             return;
-        }}
+        }
         
-        let queryRegex = new RegExp('(' + query.replace(/[.*+?^${{}}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        let queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
         
-        let html = `<div class="grid-group-label" style="margin-bottom: 10px;">搜索结果 (${{results.length}})</div><div class="bk-grid" id="searchGrid">`;
+        let html = `<div class="grid-group-label" style="margin-bottom: 10px;">搜索结果 (${results.length})</div><div class="bk-grid" id="searchGrid">`;
         
-        for (let i = 0; i < results.length; i++) {{
+        for (let i = 0; i < results.length; i++) {
             let item = results[i];
             let titleHtml = escapeHtml(item.title).replace(queryRegex, '<mark>$1</mark>');
-            let pathHtml = item.path ? `<div style="font-size: 10px; color: var(--text-soft); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${{escapeHtml(item.path)}}</div>` : '';
+            let pathHtml = item.path ? `<div style="font-size: 10px; color: var(--text-soft); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.path)}</div>` : '';
             
             html += `
-                <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card search-card" data-index="${{i}}" title="${{escapeHtml(item.title)}}" style="flex-direction: column; align-items: flex-start; justify-content: center; padding: 8px 12px;">
+                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener external nofollow" class="bk-card search-card" data-index="${i}" title="${escapeHtml(item.title)}" style="flex-direction: column; align-items: flex-start; justify-content: center; padding: 8px 12px;">
                     <div style="display: flex; align-items: center; gap: 9px; width: 100%;">
-                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${{escapeHtml(item.title.charAt(0))}}</text></svg>'">
-                        <span class="bk-name" style="width: calc(100% - 27px);">${{titleHtml}}</span>
+                        <img src="${escapeHtml(item.favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${escapeHtml(item.title.charAt(0))}</text></svg>'">
+                        <span class="bk-name" style="width: calc(100% - 27px);">${titleHtml}</span>
                     </div>
-                    ${{pathHtml}}
+                    ${pathHtml}
                 </a>
             `;
-        }}
+        }
         html += `</div>`;
-        contentDiv.innerHTML = `<section class="panel active">${{html}}</section>`;
+        contentDiv.innerHTML = `<section class="panel active">${html}</section>`;
         focusedIndex = -1;
-    }}
+    }
 
-    function updateSearchFocus() {{
+    function updateSearchFocus() {
         let cards = document.querySelectorAll('.search-card');
-        cards.forEach((c, idx) => {{
-            if (idx === focusedIndex) {{
+        cards.forEach((c, idx) => {
+            if (idx === focusedIndex) {
                 c.classList.add('active-focus');
-                c.scrollIntoView({{behavior: 'smooth', block: 'nearest'}});
-            }} else {{
+                c.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            } else {
                 c.classList.remove('active-focus');
-            }}
-        }});
-    }}
+            }
+        });
+    }
 
-    searchInput.addEventListener('input', function () {{
+    searchInput.addEventListener('input', function () {
         const query = this.value.trim().toLowerCase();
-        if (!query) {{
+        if (!query) {
             // 恢复
             let activeNav = document.querySelector('.nav-item.active');
-            if (activeNav) {{
+            if (activeNav) {
                 switchPanel(activeNav, currentPanelIdx);
-            }} else {{
+            } else {
                 switchPanel(document.querySelector('.nav-item'), 0);
-            }}
+            }
             return;
-        }}
+        }
         
         searchResults = window.searchIndex.filter(item => 
             item.title.toLowerCase().includes(query) || 
@@ -1014,50 +1014,50 @@ def generate_nav_html(bookmarks: list) -> str:
         ).slice(0, 200); // 限制最多展示 200 条，保证性能
 
         renderSearchResults(searchResults, query);
-    }});
+    });
 
     // ── 快捷键 ──
-    document.addEventListener('keydown', function (e) {{
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {{
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
             searchInput.focus();
             searchInput.select();
-        }}
-        if (e.key === 'Escape') {{
+        }
+        if (e.key === 'Escape') {
             searchInput.value = '';
             searchInput.dispatchEvent(new Event('input'));
             searchInput.blur();
-        }}
+        }
         
         // 搜索结果键盘导航
-        if (document.activeElement === searchInput && searchInput.value.trim() && searchResults.length > 0) {{
+        if (document.activeElement === searchInput && searchInput.value.trim() && searchResults.length > 0) {
             let cards = document.querySelectorAll('.search-card');
             let cols = 1; // 估算列数，目前响应式可能是 2-5 列，由于键盘操作复杂，暂做一维导航或简单二维估算
             // 简单化，上下左右都当作一维切换
-            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {{
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
                 e.preventDefault();
                 focusedIndex = Math.min(focusedIndex + 1, cards.length - 1);
                 updateSearchFocus();
-            }} else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {{
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
                 e.preventDefault();
                 focusedIndex = Math.max(focusedIndex - 1, 0);
                 updateSearchFocus();
-            }} else if (e.key === 'Enter') {{
+            } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (focusedIndex >= 0 && focusedIndex < cards.length) {{
+                if (focusedIndex >= 0 && focusedIndex < cards.length) {
                     cards[focusedIndex].click();
-                }} else if (cards.length > 0) {{
+                } else if (cards.length > 0) {
                     cards[0].click(); // 默认回车打开第一个
-                }}
-            }}
-        }}
-    }});
+                }
+            }
+        }
+    });
 
     // 初始化加载第一屏
-    window.addEventListener('DOMContentLoaded', () => {{
+    window.addEventListener('DOMContentLoaded', () => {
         let firstNav = document.querySelector('.nav-item');
         if (firstNav) switchPanel(firstNav, 0);
-    }});
+    });
   </script>
 </body>
 </html>'''
