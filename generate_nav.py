@@ -167,7 +167,7 @@ def render_bookmark_grid(bookmarks: list) -> str:
         domain = get_domain(url)
         favicon = get_favicon_url(url)
 
-        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card" title="{esc(title)}">
+        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener nofollow" class="bk-card" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>{esc(title[:1])}</text></svg>'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
@@ -224,7 +224,7 @@ def render_section_items(items: list, depth: int) -> str:
                 continue
             title = item.get("title", "")
             favicon = get_favicon_url(url)
-            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card loose" title="{esc(title)}">
+            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener nofollow" class="bk-card loose" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
@@ -401,8 +401,18 @@ def generate_nav_html(bookmarks: list) -> str:
   <meta property="og:description" content="收录数千个精选网站与高效工具的个人导航，快速查找各类数字资源。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://nav.wenyaoyefei.com/">
+  <meta property="og:image" content="https://nav.wenyaoyefei.com/logo.png">
   <link rel="canonical" href="https://nav.wenyaoyefei.com/" />
   <link rel="icon" href="logo.png" type="image/png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "数字驾驶舱 - 精选高效工具与优质资源导航",
+    "url": "https://nav.wenyaoyefei.com/",
+    "description": "一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页。"
+  }
+  </script>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
@@ -556,6 +566,58 @@ def generate_nav_html(bookmarks: list) -> str:
       background: linear-gradient(135deg, rgba(var(--primary-rgb), 1), rgba(var(--primary-rgb), 0.6));
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    .top-banner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.35), rgba(var(--secondary-rgb), 0.15));
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .top-banner a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 6px;
+      background: rgba(var(--primary-rgb), 0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.2s ease;
+    }
+
+    .top-banner a:hover {
+      background: rgba(var(--primary-rgb), 0.8);
+      transform: translateY(-1px);
+    }
+
+    .site-footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--text-soft);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(10, 15, 22, 0.6);
+    }
+
+    .site-footer a {
+      color: rgba(var(--primary-rgb), 1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .site-footer a:hover {
+      color: #fff;
     }
 
     .nav-item {
@@ -1012,6 +1074,10 @@ def generate_nav_html(bookmarks: list) -> str:
 <body>
   <h1 class="seo-hidden">数字驾驶舱 - 精选高效工具与优质资源导航大全</h1>
 
+  <div class="top-banner">
+    🌐 欢迎访问我的个人主页：<a href="https://www.wenyaoyefei.com" target="_blank">www.wenyaoyefei.com</a>
+  </div>
+
   <div class="mobile-header">
     <img class="mobile-logo" src="logo.png" alt="数字驾驶舱 Logo">
     <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
@@ -1153,6 +1219,10 @@ def generate_nav_html(bookmarks: list) -> str:
       }
     });
   </script>
+
+  <footer class="site-footer">
+    © 2025 Wenray | <a href="https://www.wenyaoyefei.com" target="_blank">🏠 访问我的主页</a> | <a href="https://nav.wenyaoyefei.com">数字驾驶舱</a>
+  </footer>
 </body>
 
 </html>'''
