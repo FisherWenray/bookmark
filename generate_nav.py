@@ -355,10 +355,9 @@ def generate_nav_html(bookmarks: list) -> str:
                 )
                 idx += 1
                 
-            # 将该分组以折叠框形式放入侧边栏
+            # 将该分组作为静态标题栏放入侧边栏
             nav_items.append(f'''<div class="nav-group">
-  <div class="nav-group-header" onclick="toggleNavGroup(this)">
-    <span class="group-arrow">▼</span>
+  <div class="nav-group-header">
     <span>{esc(group_name)}</span>
   </div>
   <div class="nav-group-items">
@@ -800,58 +799,55 @@ def generate_nav_html(bookmarks: list) -> str:
     }
 
     .nav-group {
-      margin: 3px 0;
-      border-radius: 11px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      overflow: hidden;
+      margin: 12px 0 6px;
     }
 
     .nav-group-header {
-      padding: 11px 14px;
-      font-size: 13px;
+      padding: 8px 14px 4px;
+      font-size: 11px;
       font-weight: 700;
-      color: rgba(220, 233, 247, 0.62);
-      cursor: pointer;
+      color: rgba(var(--primary-rgb), 0.85);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      user-select: none;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: all 0.22s ease;
-      user-select: none;
-      border-radius: 11px;
-    }
-
-    .nav-group-header:hover {
-      color: #f2f7ff;
-      background: rgba(var(--primary-rgb), 0.12);
-    }
-
-    .nav-group-header .group-arrow {
-      font-size: 9px;
-      color: rgba(var(--primary-rgb), 0.7);
-      transition: transform 0.2s ease;
-      display: inline-block;
-    }
-
-    .nav-group.collapsed .nav-group-header .group-arrow {
-      transform: rotate(-90deg);
-    }
-
-    .nav-group.collapsed .nav-group-items {
-      display: none;
     }
 
     .nav-group-items {
-      display: block;
-      padding-bottom: 4px;
-      border-top: 1px dashed rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-left: 1px solid rgba(255, 255, 255, 0.07);
+      margin-left: 16px;
+      padding-left: 6px;
     }
 
     .nav-item.sub-item {
-      padding-left: 28px;
-      margin: 1px 6px;
-      font-size: 12px;
-      color: rgba(220, 233, 247, 0.55);
+      padding: 8px 12px;
+      margin: 1px 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(220, 233, 247, 0.6);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.sub-item:hover {
+      color: #ffffff;
+      background: rgba(var(--primary-rgb), 0.10);
+      border-color: rgba(var(--primary-rgb), 0.15);
+    }
+
+    .nav-item.sub-item.active {
+      color: #ffffff;
+      background:
+        linear-gradient(110deg, rgba(var(--primary-rgb), 0.45), rgba(var(--primary-rgb), 0.15)),
+        rgba(255, 255, 255, 0.02);
+      border-color: var(--line-strong);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.2);
+      font-weight: 700;
     }
 
     .search-hidden {
@@ -984,10 +980,7 @@ def generate_nav_html(bookmarks: list) -> str:
       header.parentElement.classList.toggle('collapsed');
     }
 
-    // ── 侧边栏分类组折叠 ──
-    function toggleNavGroup(header) {
-      header.parentElement.classList.toggle('collapsed');
-    }
+
 
     // ── 搜索 ──
     const searchInput = document.getElementById('searchInput');
