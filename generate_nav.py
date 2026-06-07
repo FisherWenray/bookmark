@@ -160,12 +160,10 @@ def render_bookmark_grid(bookmarks: list) -> str:
             if clean:
                 current_group_label = clean
             continue
-
-        if "url" not in item:
-            continue
-
-        title = item.get("title", "无标题")
         url = item.get("url", "")
+        if not url or url.strip().lower().startswith("javascript:"):
+            continue
+        title = item.get("title", "无标题")
         domain = get_domain(url)
         favicon = get_favicon_url(url)
 
@@ -197,7 +195,7 @@ def render_section_items(items: list, depth: int) -> str:
                 grid_html = render_bookmark_grid(sub_children)
                 if not grid_html:
                     continue
-                bk_count = len([c for c in sub_children if "url" in c and not is_separator(c)])
+                bk_count = len([c for c in sub_children if "url" in c and not is_separator(c) and not c.get("url", "").strip().lower().startswith("javascript:")])
                 parts.append(f'''<div class="sub-section depth-{depth} {collapsed}">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
@@ -219,8 +217,10 @@ def render_section_items(items: list, depth: int) -> str:
 </div>''')
 
         elif "url" in item:
-            title = item.get("title", "")
             url = item.get("url", "")
+            if not url or url.strip().lower().startswith("javascript:"):
+                continue
+            title = item.get("title", "")
             favicon = get_favicon_url(url)
             parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card loose" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
