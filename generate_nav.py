@@ -473,6 +473,13 @@ def generate_nav_html(bookmarks: list) -> str:
       height: 100vh;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
+    }
+
+    .app-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
       padding: 14px;
       gap: 14px;
     }
@@ -519,7 +526,7 @@ def generate_nav_html(bookmarks: list) -> str:
     .sidebar {
       width: 236px;
       min-width: 236px;
-      height: calc(100vh - 28px);
+      height: 100%;
       background: linear-gradient(180deg, rgba(22, 31, 43, 0.94), rgba(11, 16, 24, 0.94));
       border: 1px solid var(--line-soft);
       border-radius: 18px;
@@ -669,7 +676,7 @@ def generate_nav_html(bookmarks: list) -> str:
     .main {
       flex: 1;
       min-width: 0;
-      height: calc(100vh - 28px);
+      height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1091,6 +1098,8 @@ def generate_nav_html(bookmarks: list) -> str:
     🌐 欢迎访问我的个人主页：<a href="https://www.wenyaoyefei.com" target="_blank">www.wenyaoyefei.com</a>
   </div>
 
+  <div class="app-body">
+
   <div class="mobile-header">
     <img class="mobile-logo" src="logo.png" alt="数字驾驶舱 Logo">
     <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
@@ -1242,6 +1251,7 @@ def generate_nav_html(bookmarks: list) -> str:
       }
     })();
   </script>
+  </div><!-- end .app-body -->
 
   <footer class="site-footer">
     © 2025 Wenray | <a href="https://www.wenyaoyefei.com" target="_blank">🏠 访问我的主页</a> | <a href="https://nav.wenyaoyefei.com">数字驾驶舱</a>
