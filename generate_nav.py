@@ -169,7 +169,7 @@ def render_bookmark_grid(bookmarks: list) -> str:
         domain = get_domain(url)
         favicon = get_favicon_url(url)
 
-        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card" title="{esc(title)}">
+        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener external nofollow" class="bk-card" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>{esc(title[:1])}</text></svg>'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
@@ -201,7 +201,7 @@ def render_section_items(items: list, depth: int) -> str:
                 parts.append(f'''<div class="sub-section depth-{depth} {collapsed}">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
-    <span class="sub-title">{esc(folder_name)}</span>
+    <h3 class="sub-title">{esc(folder_name)}</h3>
     <span class="sub-count">{bk_count}</span>
   </div>
   <div class="sub-body">{grid_html}</div>
@@ -213,7 +213,7 @@ def render_section_items(items: list, depth: int) -> str:
                 parts.append(f'''<div class="sub-section depth-{depth} {collapsed}">
   <div class="sub-header" onclick="toggleSub(this)">
     <span class="arrow">▶</span>
-    <span class="sub-title">{esc(folder_name)}</span>
+    <h3 class="sub-title">{esc(folder_name)}</h3>
   </div>
   <div class="sub-body">{inner}</div>
 </div>''')
@@ -222,7 +222,7 @@ def render_section_items(items: list, depth: int) -> str:
             title = item.get("title", "")
             url = item.get("url", "")
             favicon = get_favicon_url(url)
-            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener" class="bk-card loose" title="{esc(title)}">
+            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener external nofollow" class="bk-card loose" title="{esc(title)}">
   <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
   <span class="bk-name">{esc(title)}</span>
 </a>''')
@@ -295,7 +295,7 @@ def generate_nav_html(bookmarks: list) -> str:
 
         # 右侧面板
         content_html = render_section_content(children, depth=0)
-        panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
+        panels.append(f'<section class="panel {active}" id="{panel_id}">{content_html}</section>')
         idx += 1
 
     nav_html = "\n".join(nav_items)
@@ -307,7 +307,13 @@ def generate_nav_html(bookmarks: list) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>书签导航</title>
+  <title>书签导航 - 高效的网址收藏与发现工具</title>
+  <meta name="description" content="精选收录各类优质网站、工具、开发文档与资源，为您提供高效便捷的上网导航体验。">
+  <meta name="keywords" content="书签,网址导航,开发工具,网站收藏">
+  <meta property="og:title" content="书签导航 - 你的专属网址库">
+  <meta property="og:description" content="精选海量优质网站资源，快速定位你需要的工具。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://yourdomain.com/logo.png">
   <style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
@@ -809,19 +815,19 @@ def generate_nav_html(bookmarks: list) -> str:
 
 <body>
 
-  <div class="sidebar">
-    <div class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="导航 Logo"></div>
+  <nav class="sidebar">
+    <h1 class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="书签导航 Logo"></h1>
     ''' + nav_html + '''
-  </div>
+  </nav>
 
-  <div class="main">
-    <div class="search-bar">
+  <main class="main">
+    <header class="search-bar">
       <input type="text" id="searchInput" placeholder="🔍 搜索书签... (Cmd+K)" autocomplete="off">
-    </div>
+    </header>
     <div class="content" id="content">
       ''' + panels_html + '''
     </div>
-  </div>
+  </main>
 
   <script>
     // ── 侧边栏切换面板 ──
