@@ -117,7 +117,14 @@ def get_level1_folders(bookmarks: list) -> list:
     for item in bookmarks:
         if isinstance(item, dict) and item.get("toolbar"):
             return item.get("children", [])
-    # 如果没有 toolbar，直接返回根层
+    
+    # 如果只有一个顶级文件夹，且是书签栏外壳，自动跳过并返回其子文件夹
+    folders = [item for item in bookmarks if isinstance(item, dict) and "folder" in item]
+    if len(folders) == 1:
+        f_name = folders[0]["folder"].strip()
+        if f_name in ["书签栏", "Bookmarks Bar", "Favorites Bar", "Favorites", "Bookmarks", "书签"]:
+            return folders[0].get("children", [])
+            
     return bookmarks
 
 
