@@ -272,6 +272,17 @@ def render_section_content(children: list, depth: int = 0) -> str:
 def generate_nav_html(bookmarks: list) -> str:
     level1 = get_level1_folders(bookmarks)
 
+    # 将 "资源搜索" 移动到 level1 的最前面，以便作为单列置顶常驻
+    search_item = None
+    new_level1 = []
+    for item in level1:
+        if isinstance(item, dict) and item.get("folder") == "资源搜索":
+            search_item = item
+        else:
+            new_level1.append(item)
+    if search_item:
+        level1 = [search_item] + new_level1
+
     # 定义分类映射：将一级目录合并为各个侧边栏折叠大类
     GROUP_MAPPING = {
         "哲学心理": "基础学科",
@@ -288,6 +299,8 @@ def generate_nav_html(bookmarks: list) -> str:
         "产品运营": "数字生产力",
         "娱乐休闲": "生活娱乐",
         "生活频道": "生活娱乐",
+        "新闻资讯": "资讯与数码",
+        "科技数码": "资讯与数码",
     }
 
     # 按照 GROUP_MAPPING 对 level1 进行预分组排重，使同组项目在侧边栏连续排列
