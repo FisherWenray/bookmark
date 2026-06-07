@@ -280,37 +280,16 @@ def generate_nav_html(bookmarks: list) -> str:
         "自然科学": "基础学科",
     }
 
-    grouped_level1 = []
-    seen_groups = {}  # group_name -> index in grouped_level1
-
-    for item in level1:
-        if not isinstance(item, dict) or "folder" not in item:
-            grouped_level1.append(item)
-            continue
-        
-        folder_name = item["folder"]
-        if folder_name in GROUP_MAPPING:
-            group_name = GROUP_MAPPING[folder_name]
-            if group_name not in seen_groups:
-                group_item = {
-                    "folder": group_name,
-                    "is_group": True,
-                    "sub_folders": [item]
-                }
-                seen_groups[group_name] = len(grouped_level1)
-                grouped_level1.append(group_item)
-            else:
-                idx_pos = seen_groups[group_name]
-                grouped_level1[idx_pos]["sub_folders"].append(item)
-        else:
-            grouped_level1.append(item)
-
     # 提取一级文件夹
     nav_items = []
     panels = []
 
+    # 追踪当前所在的侧边栏分组
+    current_group_name = None
+    group_items_html = []
+
     idx = 0
-    for item in grouped_level1:
+    for item in level1:
         if not isinstance(item, dict):
             continue
         if "folder" not in item:
@@ -319,36 +298,72 @@ def generate_nav_html(bookmarks: list) -> str:
             continue
 
         folder_name = item["folder"]
+        children = item.get("children", [])
         panel_id = f"panel-{idx}"
         active = "active" if idx == 0 else ""
 
-        # 侧边栏导航项
-        nav_items.append(
-            f'<div class="nav-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>'
-        )
-
-        # 右侧面板
-        if item.get("is_group"):
-            content_parts = []
-            for sub in item["sub_folders"]:
-                sub_name = sub["folder"]
-                sub_children = sub.get("children", [])
-                sub_content = render_section_content(sub_children, depth=0)
-                if not sub_content.strip():
-                    continue
-                content_parts.append(f'''<div class="group-sub-category">
-  <div class="group-sub-category-title">{esc(sub_name)}</div>
-  <div class="group-sub-category-content">{sub_content}</div>
-</div>''')
-            content_html = "\n".join(content_parts)
-        else:
-            children = item.get("children", [])
-            content_html = render_section_content(children, depth=0)
-
+        # 生成右侧面板内容（保留各个一级文件夹的独立内容）
+        content_html = render_section_content(children, depth=0)
         panels.append(f'<div class="panel {active}" id="{panel_id}">{content_html}</div>')
+
+        # 检查是否属于某个侧边栏分组
+        group_name = GROUP_MAPPING.get(folder_name)
+
+        if group_name:
+            if current_group_name != group_name:
+                # 如果遇到新的分组，且之前有未闭合的分组，先闭合它
+                if current_group_name is not None:
+                    nav_items.append(f'''<div class="nav-group">
+  <div class="nav-group-header" onclick="toggleNavGroup(this)">
+    <span class="group-arrow">▼</span>
+    <span>{esc(current_group_name)}</span>
+  </div>
+  <div class="nav-group-items">
+    {"".join(group_items_html)}
+  </div>
+</div>''')
+                    group_items_html = []
+                current_group_name = group_name
+            
+            # 添加子项导航
+            group_items_html.append(
+                f'<div class="nav-item sub-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>\n'
+            )
+        else:
+            # 如果从分组里走出来，先闭合之前的分组
+            if current_group_name is not None:
+                nav_items.append(f'''<div class="nav-group">
+  <div class="nav-group-header" onclick="toggleNavGroup(this)">
+    <span class="group-arrow">▼</span>
+    <span>{esc(current_group_name)}</span>
+  </div>
+  <div class="nav-group-items">
+    {"".join(group_items_html)}
+  </div>
+</div>''')
+                current_group_name = None
+                group_items_html = []
+
+            # 正常的一级导航项
+            nav_items.append(
+                f'<div class="nav-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>\n'
+            )
+
         idx += 1
 
-    nav_html = "\n".join(nav_items)
+    # 循环结束后，如果有未闭合的分组，进行闭合
+    if current_group_name is not None:
+        nav_items.append(f'''<div class="nav-group">
+  <div class="nav-group-header" onclick="toggleNavGroup(this)">
+    <span class="group-arrow">▼</span>
+    <span>{esc(current_group_name)}</span>
+  </div>
+  <div class="nav-group-items">
+    {"".join(group_items_html)}
+  </div>
+</div>''')
+
+    nav_html = "".join(nav_items)
     panels_html = "\n".join(panels)
 
     return '''<!DOCTYPE html>
@@ -761,27 +776,59 @@ def generate_nav_html(bookmarks: list) -> str:
       margin: 3px;
     }
 
-    .group-sub-category {
-      margin-bottom: 28px;
+    .nav-group {
+      margin: 3px 0;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      overflow: hidden;
     }
 
-    .group-sub-category-title {
-      font-family: "Noto Serif SC", "Kaiti SC", serif;
-      font-size: 20px;
-      font-weight: 900;
-      color: #ffffff;
-      padding-left: 12px;
-      border-left: 4px solid var(--secondary);
-      margin-bottom: 16px;
+    .nav-group-header {
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(220, 233, 247, 0.62);
+      cursor: pointer;
       display: flex;
       align-items: center;
-      letter-spacing: 0.5px;
+      gap: 8px;
+      transition: all 0.22s ease;
+      user-select: none;
+      border-radius: 11px;
     }
 
-    .group-sub-category-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .nav-group-header:hover {
+      color: #f2f7ff;
+      background: rgba(var(--primary-rgb), 0.12);
+    }
+
+    .nav-group-header .group-arrow {
+      font-size: 9px;
+      color: rgba(var(--primary-rgb), 0.7);
+      transition: transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .nav-group.collapsed .nav-group-header .group-arrow {
+      transform: rotate(-90deg);
+    }
+
+    .nav-group.collapsed .nav-group-items {
+      display: none;
+    }
+
+    .nav-group-items {
+      display: block;
+      padding-bottom: 4px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item.sub-item {
+      padding-left: 28px;
+      margin: 1px 6px;
+      font-size: 12px;
+      color: rgba(220, 233, 247, 0.55);
     }
 
     .search-hidden {
@@ -914,6 +961,11 @@ def generate_nav_html(bookmarks: list) -> str:
       header.parentElement.classList.toggle('collapsed');
     }
 
+    // ── 侧边栏分类组折叠 ──
+    function toggleNavGroup(header) {
+      header.parentElement.classList.toggle('collapsed');
+    }
+
     // ── 搜索 ──
     const searchInput = document.getElementById('searchInput');
     const content = document.getElementById('content');
@@ -941,7 +993,7 @@ def generate_nav_html(bookmarks: list) -> str:
 
       // 搜索模式：显示所有面板
       document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
-      content.querySelectorAll('.bk-card, .sub-section, .tier-group, .group-sub-category').forEach(el => el.classList.add('search-hidden'));
+      content.querySelectorAll('.bk-card, .sub-section, .tier-group').forEach(el => el.classList.add('search-hidden'));
 
       const queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')', 'gi');
       const highlightedSubTitles = new Set();
@@ -981,8 +1033,6 @@ def generate_nav_html(bookmarks: list) -> str:
           if (panel) panel.classList.remove('search-hidden');
           let tier = card.closest('.tier-group');
           if (tier) tier.classList.remove('search-hidden');
-          let groupSub = card.closest('.group-sub-category');
-          if (groupSub) groupSub.classList.remove('search-hidden');
         }
       });
     });
