@@ -965,6 +965,7 @@ def generate_nav_html(bookmarks: list) -> str:
       }
     }
   </style>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="7f657995-bcbb-47bc-aac7-6445d433598c"></script>
 </head>
 
 <body>
