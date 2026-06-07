@@ -272,7 +272,7 @@ def render_section_content(children: list, depth: int = 0) -> str:
 def generate_nav_html(bookmarks: list) -> str:
     level1 = get_level1_folders(bookmarks)
 
-    # 定义分类映射：将特定一级目录合并为“基础学科”与“音乐.电影.读书”
+    # 定义分类映射：将一级目录合并为各个侧边栏折叠大类
     GROUP_MAPPING = {
         "哲学心理": "基础学科",
         "社会科学": "基础学科",
@@ -281,6 +281,11 @@ def generate_nav_html(bookmarks: list) -> str:
         "电影艺术": "音乐.电影.读书",
         "音乐视频": "音乐.电影.读书",
         "文学知识": "音乐.电影.读书",
+        "在线办公": "数字生产力",
+        "在线工具": "数字生产力",
+        "软件开发": "数字生产力",
+        "平面设计": "数字生产力",
+        "产品运营": "数字生产力",
     }
 
     # 按照 GROUP_MAPPING 对 level1 进行预分组排重，使同组项目在侧边栏连续排列
