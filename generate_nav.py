@@ -877,70 +877,91 @@ def generate_nav_html(bookmarks: list) -> str:
       }
     }
 
-    @media (max-width: 768px) {
-      body {
-        padding: 8px;
-      }
-
-      .sidebar {
-        width: 166px;
-        min-width: 166px;
-      }
-
-      .nav-item {
-        padding: 9px 10px;
-        font-size: 12px;
-      }
-
-      .search-bar {
-        padding: 14px;
-      }
-
-      .content {
-        padding: 14px;
-      }
-
-      .bk-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-      }
+    .mobile-header {
+      display: none;
     }
 
-    @media (max-width: 540px) {
+    .sidebar-overlay {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
       body {
+        padding: 0;
         flex-direction: column;
-        overflow: auto;
-        height: auto;
       }
 
-      .sidebar,
-      .main {
-        width: 100%;
-        min-width: 100%;
-        height: auto;
+      .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        background: #0f172a;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 1000;
+        position: sticky;
+        top: 0;
+      }
+
+      .mobile-header .mobile-logo {
+        height: 24px;
+      }
+
+      .hamburger-btn {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
       }
 
       .sidebar {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 10px;
-        border-radius: 14px;
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        min-width: 260px;
+        z-index: 1001;
+        transition: left 0.3s ease;
+        border-radius: 0;
+        padding-top: 20px;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.5);
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
       }
 
       .sidebar-title {
         display: none;
       }
 
-      .nav-item {
-        min-width: fit-content;
-      }
-
       .main {
-        min-height: calc(100vh - 120px);
+        padding: 10px;
       }
-
-      .content {
-        overflow: visible;
+      
+      .bk-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       }
     }
   </style>
@@ -948,7 +969,13 @@ def generate_nav_html(bookmarks: list) -> str:
 
 <body>
 
-  <div class="sidebar">
+  <div class="mobile-header">
+    <img class="mobile-logo" src="logo.png" alt="数字驾驶舱 Logo">
+    <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar(true)"></div>
+
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="数字驾驶舱 Logo"></div>
     ''' + nav_html + '''
   </div>
@@ -963,6 +990,18 @@ def generate_nav_html(bookmarks: list) -> str:
   </div>
 
   <script>
+    function toggleMobileSidebar(forceClose = false) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (forceClose || sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      } else {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+      }
+    }
+
     // ── 侧边栏切换面板 ──
     function switchPanel(el) {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -972,6 +1011,9 @@ def generate_nav_html(bookmarks: list) -> str:
       if (panel) {
         panel.classList.add('active');
         document.getElementById('content').scrollTop = 0;
+      }
+      if (window.innerWidth <= 768) {
+        toggleMobileSidebar(true);
       }
     }
 
