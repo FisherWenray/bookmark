@@ -927,8 +927,8 @@ def generate_nav_html(bookmarks: list) -> str:
 # ─────────────────── CLI ───────────────────
 
 def main():
-    html_path = sys.argv[1] if len(sys.argv) > 1 else "CheeseBookmarks_2025_08_25.html"
-    output_path = sys.argv[2] if len(sys.argv) > 2 else "nav.html"
+    html_path = sys.argv[1] if len(sys.argv) > 1 else "raw_bookmarks/RunningCheese_Bookmarks_2026_05_06.html"
+    output_path = sys.argv[2] if len(sys.argv) > 2 else "index.html"
 
     print(f"📖 正在解析书签: {html_path}")
     bookmarks = parse_bookmarks(html_path)
