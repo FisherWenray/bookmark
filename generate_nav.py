@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-书签导航页生成器 v2
+书签导航页生成器 v3 - JSON 数据驱动 + Lazy Rendering
 左侧竖导航 + 右侧内容区 + 响应式多列书签网格
 
 用法: python3 generate_nav.py [书签.html] [输出.html]
@@ -8,14 +8,13 @@
 
 import sys
 import re
+import json
 import html as html_lib
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
-
 # ─────────────────── 解析书签 HTML ───────────────────
-
 class BookmarkParser(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -66,7 +65,6 @@ class BookmarkParser(HTMLParser):
         if self.in_a or self.in_h3:
             self.text_buf += data
 
-
 def parse_bookmarks(html_path: str) -> list:
     with open(html_path, "r", encoding="utf-8") as f:
         content = f.read()
@@ -74,9 +72,7 @@ def parse_bookmarks(html_path: str) -> list:
     parser.feed(content)
     return parser.root
 
-
 # ─────────────────── 辅助函数 ───────────────────
-
 def is_separator(item: dict) -> bool:
     if "url" not in item:
         return False
@@ -88,13 +84,11 @@ def is_separator(item: dict) -> bool:
         return True
     return False
 
-
 def get_domain(url: str) -> str:
     try:
         return urlparse(url).netloc or ""
     except Exception:
         return ""
-
 
 def get_favicon_url(url: str) -> str:
     domain = get_domain(url)
@@ -102,23 +96,14 @@ def get_favicon_url(url: str) -> str:
         return ""
     return f"https://www.google.com/s2/favicons?domain={domain}&sz=32"
 
-
-def is_leaf_folder(item: dict) -> bool:
-    children = item.get("children", [])
-    return all("folder" not in child for child in children)
-
-
 def esc(text: str) -> str:
     return html_lib.escape(text, quote=True)
 
-
 def get_level1_folders(bookmarks: list) -> list:
-    """提取一级文件夹列表（跳过书签栏外壳）"""
     for item in bookmarks:
         if isinstance(item, dict) and item.get("toolbar"):
             return item.get("children", [])
     
-    # 如果只有一个顶级文件夹，且是书签栏外壳，自动跳过并返回其子文件夹
     folders = [item for item in bookmarks if isinstance(item, dict) and "folder" in item]
     if len(folders) == 1:
         f_name = folders[0]["folder"].strip()
@@ -127,183 +112,117 @@ def get_level1_folders(bookmarks: list) -> list:
             
     return bookmarks
 
-
-# ─────────────────── 渲染函数 ───────────────────
-
 def extract_separator_label(title: str) -> str:
     return re.sub(r'[─━\-=\s]+', '', (title or "").strip())
 
-def render_bookmark_grid(bookmarks: list) -> str:
-    """将书签列表渲染为响应式网格（最后一级）"""
-    parts = []
-    current_group_label = None
-    current_items = []
+# ─────────────────── 数据处理 ───────────────────
+def process_node(node, depth=0, parent_titles=None):
+    if parent_titles is None:
+        parent_titles = []
 
-    def flush_group():
-        nonlocal current_items, current_group_label
-        if not current_items:
-            current_group_label = None
-            return
-        label_html = ""
-        if current_group_label:
-            label_html = f'<div class="grid-group-label">{esc(current_group_label)}</div>'
-        items_html = "\n".join(current_items)
-        parts.append(f'{label_html}<div class="bk-grid">{items_html}</div>')
-        current_items = []
-        current_group_label = None
+    if isinstance(node, dict):
+        if is_separator(node):
+            clean = extract_separator_label(node.get("title", ""))
+            return {"type": "separator", "label": clean}
+        elif "folder" in node:
+            folder_name = node["folder"]
+            new_parent_titles = parent_titles + [folder_name]
+            children = node.get("children", [])
+            processed_children = []
+            
+            for child in children:
+                pc = process_node(child, depth + 1, new_parent_titles)
+                if pc:
+                    processed_children.append(pc)
+                    
+            if not processed_children:
+                return None
 
-    for item in bookmarks:
-        if is_separator(item):
-            flush_group()
-            sep_title = item.get("title", "").strip()
-            clean = re.sub(r'[─━\-=\s]', '', sep_title)
-            if clean:
-                current_group_label = clean
-            continue
+            is_leaf = all(c.get("type") != "folder" for c in processed_children)
 
-        if "url" not in item:
-            continue
-
-        title = item.get("title", "无标题")
-        url = item.get("url", "")
-        domain = get_domain(url)
-        favicon = get_favicon_url(url)
-
-        current_items.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener external nofollow" class="bk-card" title="{esc(title)}">
-  <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>{esc(title[:1])}</text></svg>'">
-  <span class="bk-name">{esc(title)}</span>
-</a>''')
-
-    flush_group()
-    return "\n".join(parts) if parts else ""
-
-
-def render_section_items(items: list, depth: int) -> str:
-    parts = []
-    for item in items:
-        if is_separator(item):
-            continue
-
-        if "folder" in item:
-            folder_name = item["folder"]
-            sub_children = item.get("children", [])
-            real_children = [c for c in sub_children if not is_separator(c) or True]
-            if not real_children:
-                continue
-
-            collapsed = "" if depth == 0 else "collapsed"
-
-            if is_leaf_folder(item):
-                grid_html = render_bookmark_grid(sub_children)
-                if not grid_html:
-                    continue
-                bk_count = len([c for c in sub_children if "url" in c and not is_separator(c)])
-                parts.append(f'''<div class="sub-section depth-{depth} {collapsed}">
-  <div class="sub-header" onclick="toggleSub(this)">
-    <span class="arrow">▶</span>
-    <h3 class="sub-title">{esc(folder_name)}</h3>
-    <span class="sub-count">{bk_count}</span>
-  </div>
-  <div class="sub-body">{grid_html}</div>
-</div>''')
-            else:
-                inner = render_section_content(sub_children, depth + 1)
-                if not inner.strip():
-                    continue
-                parts.append(f'''<div class="sub-section depth-{depth} {collapsed}">
-  <div class="sub-header" onclick="toggleSub(this)">
-    <span class="arrow">▶</span>
-    <h3 class="sub-title">{esc(folder_name)}</h3>
-  </div>
-  <div class="sub-body">{inner}</div>
-</div>''')
-
-        elif "url" in item:
-            title = item.get("title", "")
-            url = item.get("url", "")
+            return {
+                "type": "folder",
+                "folder": folder_name,
+                "is_leaf": is_leaf,
+                "children": processed_children
+            }
+        elif "url" in node:
+            title = node.get("title", "")
+            url = node.get("url", "")
             favicon = get_favicon_url(url)
-            parts.append(f'''<a href="{esc(url)}" target="_blank" rel="noopener external nofollow" class="bk-card loose" title="{esc(title)}">
-  <img src="{esc(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
-  <span class="bk-name">{esc(title)}</span>
-</a>''')
+            return {
+                "type": "link",
+                "title": title,
+                "url": url,
+                "favicon": favicon,
+                "path": " > ".join(parent_titles)
+            }
+    return None
 
-    return "\n".join(parts)
-
-
-def render_section_content(children: list, depth: int = 0) -> str:
-    """递归渲染二级及以下内容"""
-    if depth != 0:
-        return render_section_items(children, depth)
-
-    has_separator = any(is_separator(item) for item in children)
-    if not has_separator:
-        return render_section_items(children, depth)
-
-    grouped = []
-    buffer_items = []
-    pending_label = ""
-
-    for item in children:
-        if is_separator(item):
-            if buffer_items:
-                grouped.append((pending_label, buffer_items))
-                buffer_items = []
-            pending_label = extract_separator_label(item.get("title", ""))
-            continue
-        buffer_items.append(item)
-
-    if buffer_items:
-        grouped.append((pending_label, buffer_items))
-
-    output = []
-    for _label, items in grouped:
-        group_html = render_section_items(items, depth)
-        if not group_html.strip():
-            continue
-        output.append(f'''<section class="tier-group">
-  <div class="tier-group-body">{group_html}</div>
-</section>''')
-
-    return "\n".join(output)
-
+def build_flat_index(processed_nodes):
+    flat = []
+    def traverse(nodes):
+        for n in nodes:
+            if n["type"] == "link":
+                flat.append({
+                    "title": n["title"],
+                    "url": n["url"],
+                    "favicon": n["favicon"],
+                    "path": n.get("path", "")
+                })
+            elif n["type"] == "folder":
+                traverse(n["children"])
+    traverse(processed_nodes)
+    return flat
 
 def generate_nav_html(bookmarks: list) -> str:
     level1 = get_level1_folders(bookmarks)
-
-    # 提取一级文件夹
+    
+    panels_data = []
     nav_items = []
-    panels = []
-
+    
     idx = 0
+    total_links = 0
     for item in level1:
-        if not isinstance(item, dict):
+        if not isinstance(item, dict) or "folder" not in item or is_separator(item):
             continue
-        if "folder" not in item:
-            continue
-        if is_separator(item):
-            continue
-
+        
         folder_name = item["folder"]
-        children = item.get("children", [])
+        raw_children = item.get("children", [])
+        
+        processed_children = []
+        for child in raw_children:
+            pc = process_node(child, depth=0, parent_titles=[folder_name])
+            if pc:
+                processed_children.append(pc)
+                
         panel_id = f"panel-{idx}"
         active = "active" if idx == 0 else ""
-
-        # 侧边栏导航项
+        
         nav_items.append(
-            f'<div class="nav-item {active}" data-panel="{panel_id}" onclick="switchPanel(this)">{esc(folder_name)}</div>'
+            f'<div class="nav-item {active}" data-panel-idx="{idx}" data-panel="{panel_id}" onclick="switchPanel(this, {idx})">{esc(folder_name)}</div>'
         )
-
-        # 右侧面板
-        content_html = render_section_content(children, depth=0)
-        panels.append(f'<section class="panel {active}" id="{panel_id}">{content_html}</section>')
+        
+        panels_data.append({
+            "id": panel_id,
+            "folder": folder_name,
+            "children": processed_children
+        })
+        
         idx += 1
-
+        
+    flat_index = []
+    for p in panels_data:
+        flat_index.extend(build_flat_index(p["children"]))
+    total_links = len(flat_index)
+    
+    json_data = json.dumps(panels_data, ensure_ascii=False, separators=(',', ':'))
+    json_index = json.dumps(flat_index, ensure_ascii=False, separators=(',', ':'))
+    
     nav_html = "\n".join(nav_items)
-    panels_html = "\n".join(panels)
 
-    return '''<!DOCTYPE html>
+    html_template = '''<!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -314,6 +233,7 @@ def generate_nav_html(bookmarks: list) -> str:
   <meta property="og:description" content="精选海量优质网站资源，快速定位你需要的工具。">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://yourdomain.com/logo.png">
+  <style>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
@@ -804,20 +724,21 @@ def generate_nav_html(bookmarks: list) -> str:
 
       .main {
         min-height: calc(100vh - 120px);
-      }
 
-      .content {
-        overflow: visible;
-      }
-    }
+    /* 增加 search result active 样式 */
+    .bk-card.active-focus {{
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.42), rgba(var(--primary-rgb), 0.24));
+      border-color: rgba(var(--primary-rgb), 0.86);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.32);
+      transform: translateY(-2px);
+    }}
   </style>
 </head>
-
 <body>
 
   <nav class="sidebar">
     <h1 class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="书签导航 Logo"></h1>
-    ''' + nav_html + '''
+    REPLACE_NAV_HTML
   </nav>
 
   <main class="main">
@@ -825,117 +746,276 @@ def generate_nav_html(bookmarks: list) -> str:
       <input type="text" id="searchInput" placeholder="🔍 搜索书签... (Cmd+K)" autocomplete="off">
     </header>
     <div class="content" id="content">
-      ''' + panels_html + '''
+      <!-- 动态渲染内容 -->
     </div>
   </main>
 
   <script>
-    // ── 侧边栏切换面板 ──
-    function switchPanel(el) {
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      el.classList.add('active');
-      const panel = document.getElementById(el.dataset.panel);
-      if (panel) {
-        panel.classList.add('active');
-        document.getElementById('content').scrollTop = 0;
-      }
-    }
+    // 注入 JSON 数据
+    window.bookmarkData = REPLACE_JSON_DATA;
+    window.searchIndex = REPLACE_JSON_INDEX;
 
-    // ── 折叠/展开子区 ──
-    function toggleSub(header) {
-      header.parentElement.classList.toggle('collapsed');
-    }
+    const contentDiv = document.getElementById("content");
+    const searchInput = document.getElementById("searchInput");
+    let currentPanelIdx = 0;
+    
+    function escapeHtml(unsafe) {{
+        return (unsafe || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }}
 
-    // ── 搜索 ──
-    const searchInput = document.getElementById('searchInput');
-    const content = document.getElementById('content');
+    function renderBookmarkGrid(items) {{
+        let html = "";
+        let currentGroupLabel = null;
+        let currentGroupItems = [];
 
-    searchInput.addEventListener('input', function () {
-      const query = this.value.trim().toLowerCase();
+        function flushGroup() {{
+            if (currentGroupItems.length === 0) return;
+            if (currentGroupLabel) {{
+                html += `<div class="grid-group-label">${{escapeHtml(currentGroupLabel)}}</div>`;
+            }}
+            html += `<div class="bk-grid">${{currentGroupItems.join("")}}</div>`;
+            currentGroupItems = [];
+            currentGroupLabel = null;
+        }}
 
-      // 清除高亮
-      content.querySelectorAll('mark').forEach(m => m.replaceWith(m.textContent));
+        for (let item of items) {{
+            if (item.type === "separator") {{
+                flushGroup();
+                if (item.label) currentGroupLabel = item.label;
+            }} else if (item.type === "link") {{
+                currentGroupItems.push(`
+                    <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card" title="${{escapeHtml(item.title)}}">
+                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${{escapeHtml(item.title.charAt(0))}}</text></svg>'">
+                        <span class="bk-name">${{escapeHtml(item.title)}}</span>
+                    </a>
+                `);
+            }}
+        }}
+        flushGroup();
+        return html;
+    }}
 
-      if (!query) {
-        content.querySelectorAll('.search-hidden').forEach(el => el.classList.remove('search-hidden'));
-        // 恢复当前活跃面板
-        const activeNav = document.querySelector('.nav-item.active');
-        if (activeNav) {
-          document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-          const panel = document.getElementById(activeNav.dataset.panel);
-          if (panel) panel.classList.add('active');
-        }
-        // 恢复折叠
-        content.querySelectorAll('.sub-section.depth-1, .sub-section.depth-2').forEach(s => s.classList.add('collapsed'));
-        content.querySelectorAll('.sub-section.depth-0').forEach(s => s.classList.remove('collapsed'));
-        return;
-      }
+    function renderSectionItems(items, depth) {{
+        let html = "";
+        for (let item of items) {{
+            if (item.type === "separator") continue;
+            
+            if (item.type === "folder") {{
+                let collapsed = depth === 0 ? "" : "collapsed";
+                if (item.is_leaf) {{
+                    let gridHtml = renderBookmarkGrid(item.children);
+                    if (!gridHtml) continue;
+                    let bkCount = item.children.filter(c => c.type === "link").length;
+                    html += `
+                        <div class="sub-section depth-${{depth}} ${{collapsed}}">
+                            <div class="sub-header" onclick="toggleSub(this)">
+                                <span class="arrow">▶</span>
+                                <h3 class="sub-title">${{escapeHtml(item.folder)}}</h3>
+                                <span class="sub-count">${{bkCount}}</span>
+                            </div>
+                            <div class="sub-body">${{gridHtml}}</div>
+                        </div>
+                    `;
+                }} else {{
+                    let inner = renderSectionContent(item.children, depth + 1);
+                    if (!inner.trim()) continue;
+                    html += `
+                        <div class="sub-section depth-${{depth}} ${{collapsed}}">
+                            <div class="sub-header" onclick="toggleSub(this)">
+                                <span class="arrow">▶</span>
+                                <h3 class="sub-title">${{escapeHtml(item.folder)}}</h3>
+                            </div>
+                            <div class="sub-body">${{inner}}</div>
+                        </div>
+                    `;
+                }}
+            }} else if (item.type === "link") {{
+                html += `
+                    <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card loose" title="${{escapeHtml(item.title)}}">
+                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span class="bk-name">${{escapeHtml(item.title)}}</span>
+                    </a>
+                `;
+            }}
+        }}
+        return html;
+    }}
 
-      // 搜索模式：显示所有面板
-      document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
-      content.querySelectorAll('.bk-card, .sub-section, .tier-group').forEach(el => el.classList.add('search-hidden'));
+    function renderSectionContent(children, depth) {{
+        if (depth !== 0) return renderSectionItems(children, depth);
+        
+        let hasSeparator = children.some(c => c.type === "separator");
+        if (!hasSeparator) return renderSectionItems(children, depth);
 
-      const queryRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')', 'gi');
-      const highlightedSubTitles = new Set();
+        let grouped = [];
+        let bufferItems = [];
+        let pendingLabel = "";
 
-      content.querySelectorAll('.bk-card').forEach(card => {
-        const name = card.querySelector('.bk-name');
-        if (!name) return;
-        const text = name.textContent.toLowerCase();
-        const url = (card.getAttribute('href') || '').toLowerCase();
-        const sectionTitles = [];
-        let section = card.closest('.sub-section');
-        while (section) {
-          const subTitle = section.querySelector(':scope > .sub-header .sub-title');
-          if (subTitle) sectionTitles.push(subTitle.textContent.toLowerCase());
-          section = section.parentElement.closest('.sub-section');
-        }
-        const subTitleText = sectionTitles.join(' ');
+        for (let item of children) {{
+            if (item.type === "separator") {{
+                if (bufferItems.length > 0) {{
+                    grouped.push({{label: pendingLabel, items: bufferItems}});
+                    bufferItems = [];
+                }}
+                pendingLabel = item.label;
+                continue;
+            }}
+            bufferItems.push(item);
+        }}
+        if (bufferItems.length > 0) {{
+            grouped.push({{label: pendingLabel, items: bufferItems}});
+        }}
 
-        if (text.includes(query) || url.includes(query) || subTitleText.includes(query)) {
-          card.classList.remove('search-hidden');
-          name.innerHTML = name.textContent.replace(queryRegex, '<mark>$1</mark>');
-          let parent = card.closest('.sub-section');
-          while (parent) {
-            parent.classList.remove('search-hidden', 'collapsed');
-            const parentTitle = parent.querySelector(':scope > .sub-header .sub-title');
-            if (
-              parentTitle &&
-              !highlightedSubTitles.has(parentTitle) &&
-              parentTitle.textContent.toLowerCase().includes(query)
-            ) {
-              parentTitle.innerHTML = parentTitle.textContent.replace(queryRegex, '<mark>$1</mark>');
-              highlightedSubTitles.add(parentTitle);
-            }
-            parent = parent.parentElement.closest('.sub-section');
-          }
-          let panel = card.closest('.panel');
-          if (panel) panel.classList.remove('search-hidden');
-          let tier = card.closest('.tier-group');
-          if (tier) tier.classList.remove('search-hidden');
-        }
-      });
-    });
+        let output = "";
+        for (let group of grouped) {{
+            let groupHtml = renderSectionItems(group.items, depth);
+            if (!groupHtml.trim()) continue;
+            output += `<section class="tier-group"><div class="tier-group-body">${{groupHtml}}</div></section>`;
+        }}
+        return output;
+    }}
+
+    // 缓存渲染结果
+    const panelCache = {{}};
+
+    function switchPanel(el, idx) {{
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(el) el.classList.add('active');
+        
+        currentPanelIdx = idx;
+        
+        if (panelCache[idx]) {{
+            contentDiv.innerHTML = panelCache[idx];
+        }} else {{
+            let data = window.bookmarkData[idx];
+            if (data) {{
+                let html = `<section class="panel active" id="${{data.id}}">` + renderSectionContent(data.children, 0) + `</section>`;
+                panelCache[idx] = html;
+                contentDiv.innerHTML = html;
+            }}
+        }}
+        contentDiv.scrollTop = 0;
+    }}
+
+    function toggleSub(header) {{
+        header.parentElement.classList.toggle('collapsed');
+    }}
+
+    // ── 搜索引擎与按键导航 ──
+    let searchResults = [];
+    let focusedIndex = -1;
+
+    function renderSearchResults(results, query) {{
+        if (results.length === 0) {{
+            contentDiv.innerHTML = `<div style="padding: 20px; color: var(--text-soft); text-align: center;">没有找到符合条件的书签 😅</div>`;
+            return;
+        }}
+        
+        let queryRegex = new RegExp('(' + query.replace(/[.*+?^${{}}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        
+        let html = `<div class="grid-group-label" style="margin-bottom: 10px;">搜索结果 (${{results.length}})</div><div class="bk-grid" id="searchGrid">`;
+        
+        for (let i = 0; i < results.length; i++) {{
+            let item = results[i];
+            let titleHtml = escapeHtml(item.title).replace(queryRegex, '<mark>$1</mark>');
+            let pathHtml = item.path ? `<div style="font-size: 10px; color: var(--text-soft); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${{escapeHtml(item.path)}}</div>` : '';
+            
+            html += `
+                <a href="${{escapeHtml(item.url)}}" target="_blank" rel="noopener external nofollow" class="bk-card search-card" data-index="${{i}}" title="${{escapeHtml(item.title)}}" style="flex-direction: column; align-items: flex-start; justify-content: center; padding: 8px 12px;">
+                    <div style="display: flex; align-items: center; gap: 9px; width: 100%;">
+                        <img src="${{escapeHtml(item.favicon)}}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23334155%22/><text x=%2216%22 y=%2222%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22>${{escapeHtml(item.title.charAt(0))}}</text></svg>'">
+                        <span class="bk-name" style="width: calc(100% - 27px);">${{titleHtml}}</span>
+                    </div>
+                    ${{pathHtml}}
+                </a>
+            `;
+        }}
+        html += `</div>`;
+        contentDiv.innerHTML = `<section class="panel active">${{html}}</section>`;
+        focusedIndex = -1;
+    }}
+
+    function updateSearchFocus() {{
+        let cards = document.querySelectorAll('.search-card');
+        cards.forEach((c, idx) => {{
+            if (idx === focusedIndex) {{
+                c.classList.add('active-focus');
+                c.scrollIntoView({{behavior: 'smooth', block: 'nearest'}});
+            }} else {{
+                c.classList.remove('active-focus');
+            }}
+        }});
+    }}
+
+    searchInput.addEventListener('input', function () {{
+        const query = this.value.trim().toLowerCase();
+        if (!query) {{
+            // 恢复
+            let activeNav = document.querySelector('.nav-item.active');
+            if (activeNav) {{
+                switchPanel(activeNav, currentPanelIdx);
+            }} else {{
+                switchPanel(document.querySelector('.nav-item'), 0);
+            }}
+            return;
+        }}
+        
+        searchResults = window.searchIndex.filter(item => 
+            item.title.toLowerCase().includes(query) || 
+            item.url.toLowerCase().includes(query) || 
+            (item.path && item.path.toLowerCase().includes(query))
+        ).slice(0, 200); // 限制最多展示 200 条，保证性能
+
+        renderSearchResults(searchResults, query);
+    }});
 
     // ── 快捷键 ──
-    document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        searchInput.focus();
-        searchInput.select();
-      }
-      if (e.key === 'Escape') {
-        searchInput.value = '';
-        searchInput.dispatchEvent(new Event('input'));
-        searchInput.blur();
-      }
-    });
+    document.addEventListener('keydown', function (e) {{
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {{
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }}
+        if (e.key === 'Escape') {{
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.blur();
+        }}
+        
+        // 搜索结果键盘导航
+        if (document.activeElement === searchInput && searchInput.value.trim() && searchResults.length > 0) {{
+            let cards = document.querySelectorAll('.search-card');
+            let cols = 1; // 估算列数，目前响应式可能是 2-5 列，由于键盘操作复杂，暂做一维导航或简单二维估算
+            // 简单化，上下左右都当作一维切换
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {{
+                e.preventDefault();
+                focusedIndex = Math.min(focusedIndex + 1, cards.length - 1);
+                updateSearchFocus();
+            }} else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {{
+                e.preventDefault();
+                focusedIndex = Math.max(focusedIndex - 1, 0);
+                updateSearchFocus();
+            }} else if (e.key === 'Enter') {{
+                e.preventDefault();
+                if (focusedIndex >= 0 && focusedIndex < cards.length) {{
+                    cards[focusedIndex].click();
+                }} else if (cards.length > 0) {{
+                    cards[0].click(); // 默认回车打开第一个
+                }}
+            }}
+        }}
+    }});
+
+    // 初始化加载第一屏
+    window.addEventListener('DOMContentLoaded', () => {{
+        let firstNav = document.querySelector('.nav-item');
+        if (firstNav) switchPanel(firstNav, 0);
+    }});
   </script>
 </body>
-
 </html>'''
 
+    return html_template.replace("REPLACE_JSON_DATA", json_data).replace("REPLACE_JSON_INDEX", json_index).replace("REPLACE_NAV_HTML", nav_html), total_links
 
 # ─────────────────── CLI ───────────────────
 
@@ -946,17 +1026,15 @@ def main():
     print(f"📖 正在解析书签: {html_path}")
     bookmarks = parse_bookmarks(html_path)
 
-    print("🎨 正在生成导航页...")
-    nav_html = generate_nav_html(bookmarks)
+    print("🎨 正在生成纯数据驱动导航页 (JSON Lazy Rendering)...")
+    nav_html, total_links = generate_nav_html(bookmarks)
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(nav_html)
 
-    total = nav_html.count('class="bk-card"')
     print(f"✓ 导航页已生成: {output_path}")
-    print(f"  书签数: {total}")
+    print(f"  提取书签数: {total_links}")
     print(f"\n  open {output_path}")
-
 
 if __name__ == "__main__":
     main()
