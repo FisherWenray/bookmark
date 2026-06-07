@@ -394,7 +394,8 @@ def generate_nav_html(bookmarks: list) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>书签导航</title>
+  <title>数字驾驶舱</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap");
 
@@ -803,12 +804,11 @@ def generate_nav_html(bookmarks: list) -> str:
     }
 
     .nav-group-header {
-      padding: 8px 14px 4px;
-      font-size: 11px;
+      padding: 12px 14px 6px;
+      font-size: 14px;
       font-weight: 700;
-      color: rgba(var(--primary-rgb), 0.85);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
       user-select: none;
       display: flex;
       align-items: center;
@@ -949,7 +949,7 @@ def generate_nav_html(bookmarks: list) -> str:
 <body>
 
   <div class="sidebar">
-    <div class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="导航 Logo"></div>
+    <div class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="数字驾驶舱 Logo"></div>
     ''' + nav_html + '''
   </div>
 
