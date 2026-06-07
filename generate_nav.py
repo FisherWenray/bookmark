@@ -377,6 +377,28 @@ def generate_nav_html(bookmarks: list) -> str:
       filter: drop-shadow(0 7px 14px rgba(var(--primary-rgb), 0.32));
     }
 
+    .homepage-btn {
+      display: block;
+      margin: 0 14px 14px;
+      padding: 10px 14px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--primary-rgb), 0.4));
+      color: #fff;
+      text-decoration: none;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .homepage-btn:hover {
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 1), rgba(var(--primary-rgb), 0.6));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
     .nav-item {
       padding: 11px 14px;
       font-size: 13px;
@@ -761,7 +783,8 @@ def generate_nav_html(bookmarks: list) -> str:
   <h1 class="seo-hidden">数字驾驶舱 - 精选高效工具与优质资源导航大全</h1>
 
   <nav class="sidebar">
-    <h1 class="sidebar-title"><img class="sidebar-logo" src="logo.png" alt="书签导航 Logo"></h1>
+    <h1 class="sidebar-title"><a href="https://www.wenyaoyefei.com" target="_blank" title="访问我的主页"><img class="sidebar-logo" src="logo.png" alt="书签导航 Logo"></a></h1>
+    <a href="https://www.wenyaoyefei.com" target="_blank" class="homepage-btn">🏠 访问我的主页</a>
     REPLACE_NAV_HTML
   </nav>
 
