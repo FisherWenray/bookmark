@@ -184,6 +184,8 @@ def render_section_items(items: list, depth: int) -> str:
 
         if "folder" in item:
             folder_name = item["folder"]
+            if folder_name == "小书签栏":
+                continue
             sub_children = item.get("children", [])
             real_children = [c for c in sub_children if not is_separator(c) or True]
             if not real_children:
