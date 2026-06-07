@@ -768,6 +768,8 @@ def generate_nav_html(bookmarks: list) -> str:
 
       .main {
         min-height: calc(100vh - 120px);
+      }
+    }
 
     /* 增加 search result active 样式 */
     .bk-card.active-focus {
