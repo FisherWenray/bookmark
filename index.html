@@ -21640,11 +21640,19 @@
     }
 
     function setAsHomepage() {
+      const confirmed = window.confirm('是否将万象导航设为浏览器首页？');
+      if (!confirmed) return;
+
       // 兼容仍支持 setHomePage 的旧版浏览器。
-      if (document.body && typeof document.body.setHomePage === 'function') {
-        document.body.setHomePage(homepageUrl);
-        showHomepageToast('已将万象导航设为浏览器首页。');
-        return;
+      try {
+        document.body.style.behavior = 'url(#default#homepage)';
+        if (document.body && typeof document.body.setHomePage === 'function') {
+          document.body.setHomePage(homepageUrl);
+          showHomepageToast('已将万象导航设为浏览器首页。');
+          return;
+        }
+      } catch (error) {
+        // 现代浏览器不提供网页修改主页的权限，继续使用引导流程。
       }
 
       const ua = navigator.userAgent;
