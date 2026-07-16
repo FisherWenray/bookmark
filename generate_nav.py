@@ -640,8 +640,12 @@ def generate_nav_html(bookmarks: list) -> str:
     }
 
     .nav-item {
-      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 14px;
       font-size: 13px;
+      line-height: 1.4;
       letter-spacing: 0.2px;
       color: rgba(220, 233, 247, 0.62);
       cursor: pointer;
@@ -946,6 +950,7 @@ def generate_nav_html(bookmarks: list) -> str:
     }
 
     .nav-item.sub-item {
+      min-height: 38px;
       padding: 8px 12px;
       margin: 1px 0;
       font-size: 13px;
