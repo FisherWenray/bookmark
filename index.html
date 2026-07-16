@@ -4,22 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>数字驾驶舱 - 精选高效工具与优质资源导航</title>
+  <title>万象导航 - 精选高效工具与优质资源</title>
   <meta name="description" content="一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页，支持快捷搜索，一站式满足数字生产力需求。">
-  <meta name="keywords" content="导航网站,书签导航,工具大全,资源搜索,数字驾驶舱,个人主页,wenyaoyefei">
-  <meta property="og:title" content="数字驾驶舱 - 精选高效工具与优质资源导航">
+  <meta name="keywords" content="万象导航,导航网站,书签导航,工具大全,资源搜索,个人主页,wenyaoyefei">
+  <meta property="og:title" content="万象导航 - 精选高效工具与优质资源">
   <meta property="og:description" content="收录数千个精选网站与高效工具的个人导航，快速查找各类数字资源。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://nav.wenyaoyefei.com/">
   <meta property="og:image" content="https://nav.wenyaoyefei.com/logo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="数字驾驶舱 - 精选高效工具与优质资源导航">
+  <meta name="twitter:title" content="万象导航 - 精选高效工具与优质资源">
   <meta name="twitter:description" content="收录数千个精选网站与高效工具的个人导航，快速查找各类数字资源。">
   <meta name="twitter:image" content="https://nav.wenyaoyefei.com/logo.png">
   <meta name="author" content="Wenray">
   <meta name="theme-color" content="#0f141b">
   <link rel="canonical" href="https://nav.wenyaoyefei.com/" />
-  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
@@ -27,7 +28,7 @@
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "数字驾驶舱 - 精选高效工具与优质资源导航",
+    "name": "万象导航 - 精选高效工具与优质资源",
     "url": "https://nav.wenyaoyefei.com/",
     "description": "一个收录了数千个精选网站、高效工具、优质资源的个人书签导航页。",
     "potentialAction": {
@@ -160,7 +161,7 @@
     }
 
     .sidebar-title {
-      padding: 6px 12px 18px;
+      padding: 8px 8px 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -168,12 +169,40 @@
       margin-bottom: 10px;
     }
 
-    .sidebar-logo {
-      width: 140px;
-      max-width: 100%;
-      height: auto;
-      display: block;
+    .brand-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: #f4f7fa;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: none;
       filter: drop-shadow(0 7px 14px rgba(var(--primary-rgb), 0.32));
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .brand-name {
+      font-family: "Noto Serif SC", serif;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-tagline {
+      margin-top: 7px;
+      color: var(--text-soft);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.24em;
     }
 
     .homepage-btn {
@@ -594,8 +623,16 @@
         flex-direction: column;
       }
 
+      .app-body {
+        flex-direction: column;
+        padding: 0;
+        gap: 0;
+      }
+
       .mobile-header {
         display: flex;
+        flex: none;
+        width: 100%;
         align-items: center;
         justify-content: space-between;
         padding: 12px 20px;
@@ -606,8 +643,17 @@
         top: 0;
       }
 
-      .mobile-header .mobile-logo {
-        height: 24px;
+      .mobile-header .brand-mark {
+        width: 34px;
+        height: 34px;
+      }
+
+      .mobile-header .brand-name {
+        font-size: 17px;
+      }
+
+      .mobile-header .brand-tagline {
+        display: none;
       }
 
       .hamburger-btn {
@@ -660,6 +706,7 @@
       }
 
       .main {
+        width: 100%;
         padding: 10px;
       }
       
@@ -672,18 +719,26 @@
 </head>
 
 <body>
-  <h1 class="seo-hidden">数字驾驶舱 - 精选高效工具与优质资源导航大全</h1>
+  <h1 class="seo-hidden">万象导航 - 精选高效工具与优质资源导航大全</h1>
 
   <div class="app-body">
 
   <div class="mobile-header">
-    <img class="mobile-logo" src="logo.png" alt="数字驾驶舱 Logo">
+    <a class="brand-lockup" href="/" aria-label="万象导航首页">
+      <img class="brand-mark" src="logo.svg" alt="">
+      <span class="brand-copy"><span class="brand-name">万象导航</span><span class="brand-tagline">EXPLORE EVERYTHING</span></span>
+    </a>
     <button class="hamburger-btn" onclick="toggleMobileSidebar()">☰</button>
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar(true)"></div>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-title"><a href="https://www.wenyaoyefei.com" target="_blank" title="访问我的主页"><img class="sidebar-logo" src="logo.png" alt="数字驾驶舱 Logo"></a></div>
+    <div class="sidebar-title">
+      <a class="brand-lockup" href="/" aria-label="万象导航首页">
+        <img class="brand-mark" src="logo.svg" alt="">
+        <span class="brand-copy"><span class="brand-name">万象导航</span><span class="brand-tagline">EXPLORE EVERYTHING</span></span>
+      </a>
+    </div>
     <a href="https://www.wenyaoyefei.com" target="_blank" class="homepage-btn">🏠 访问我的主页</a>
     <div class="nav-item active" data-panel="panel-0" onclick="switchPanel(this)">资源搜索</div>
 <div class="nav-group">
@@ -21635,7 +21690,7 @@
   </div><!-- end .app-body -->
 
   <footer class="site-footer">
-    © 2025 Wenray | <a href="https://www.wenyaoyefei.com" target="_blank">🏠 访问我的主页</a> | <a href="https://nav.wenyaoyefei.com">数字驾驶舱</a>
+    © 2025 Wenray | <a href="https://www.wenyaoyefei.com" target="_blank">🏠 访问我的主页</a> | <a href="https://nav.wenyaoyefei.com">万象导航</a>
   </footer>
 </body>
 

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">万象导航</title>
+  <desc id="desc">由四枚万象窗口与金色罗盘指针组成的品牌标志</desc>
+  <defs>
+    <linearGradient id="shell" x1="36" y1="20" x2="218" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#203246"/>
+      <stop offset="1" stop-color="#0B121A"/>
+    </linearGradient>
+    <linearGradient id="petal" x1="78" y1="64" x2="182" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A9C3D6"/>
+      <stop offset="1" stop-color="#56778F"/>
+    </linearGradient>
+    <linearGradient id="needle" x1="107" y1="70" x2="145" y2="186" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4DE78"/>
+      <stop offset="1" stop-color="#B69A38"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".34"/>
+    </filter>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="58" fill="url(#shell)"/>
+  <rect x="17" y="17" width="222" height="222" rx="57" fill="none" stroke="#AFC7D8" stroke-opacity=".23" stroke-width="2"/>
+  <g filter="url(#shadow)">
+    <path d="M128 50C148 50 171 61 187 77L151 113C144 106 136 102 128 102V50Z" fill="url(#petal)"/>
+    <path d="M206 128C206 148 195 171 179 187L143 151C150 144 154 136 154 128H206Z" fill="#7698AF"/>
+    <path d="M128 206C108 206 85 195 69 179L105 143C112 150 120 154 128 154V206Z" fill="#4D6C83"/>
+    <path d="M50 128C50 108 61 85 77 69L113 105C106 112 102 120 102 128H50Z" fill="#66879E"/>
+    <circle cx="128" cy="128" r="21" fill="#101B26" stroke="#D6E4ED" stroke-opacity=".28" stroke-width="2"/>
+    <path d="M128 69L142 128L128 187L114 128L128 69Z" fill="url(#needle)"/>
+    <path d="M128 69L128 128L114 128L128 69Z" fill="#FFF0A3"/>
+    <circle cx="128" cy="128" r="8" fill="#F6E68C"/>
+    <circle cx="128" cy="128" r="3" fill="#253849"/>
+  </g>
+</svg>
