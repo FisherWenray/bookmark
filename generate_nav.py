@@ -595,9 +595,11 @@ def generate_nav_html(bookmarks: list) -> str:
       letter-spacing: 0.24em;
     }
 
-    .homepage-btn {
+    .homepage-btn,
+    .set-home-btn {
       display: block;
-      margin: 0 14px 14px;
+      width: calc(100% - 28px);
+      margin: 0 14px 10px;
       padding: 10px 14px;
       text-align: center;
       background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--primary-rgb), 0.4));
@@ -606,15 +608,54 @@ def generate_nav_html(bookmarks: list) -> str:
       border-radius: 11px;
       font-size: 14px;
       font-weight: 700;
+      font-family: inherit;
       border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    .homepage-btn:hover {
+    .homepage-btn:hover,
+    .set-home-btn:hover {
       background: linear-gradient(135deg, rgba(var(--primary-rgb), 1), rgba(var(--primary-rgb), 0.6));
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    .set-home-btn {
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, rgba(var(--secondary-rgb), 0.82), rgba(var(--secondary-rgb), 0.36));
+      border-color: rgba(var(--secondary-rgb), 0.42);
+    }
+
+    .set-home-btn:hover {
+      background: linear-gradient(135deg, rgba(var(--secondary-rgb), 1), rgba(var(--secondary-rgb), 0.56));
+    }
+
+    .homepage-toast {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      z-index: 2000;
+      width: min(360px, calc(100vw - 40px));
+      padding: 14px 16px;
+      border: 1px solid rgba(var(--secondary-rgb), 0.45);
+      border-radius: 14px;
+      background: rgba(15, 22, 31, 0.96);
+      color: #f6f1d7;
+      font-size: 13px;
+      line-height: 1.6;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .homepage-toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .site-footer {
@@ -1051,6 +1092,11 @@ def generate_nav_html(bookmarks: list) -> str:
         display: none;
       }
 
+      .homepage-toast {
+        right: 20px;
+        bottom: 20px;
+      }
+
       .hamburger-btn {
         background: none;
         border: none;
@@ -1135,8 +1181,11 @@ def generate_nav_html(bookmarks: list) -> str:
       </a>
     </div>
     <a href="https://www.wenyaoyefei.com" target="_blank" class="homepage-btn">🏠 访问我的主页</a>
+    <button type="button" class="set-home-btn" onclick="setAsHomepage()">⌂ 设为浏览器首页</button>
     ''' + nav_html + '''
   </div>
+
+  <div class="homepage-toast" id="homepageToast" role="status" aria-live="polite"></div>
 
   <div class="main">
     <div class="search-bar">
@@ -1148,6 +1197,58 @@ def generate_nav_html(bookmarks: list) -> str:
   </div>
 
   <script>
+    const homepageUrl = 'https://nav.wenyaoyefei.com/';
+    let homepageToastTimer;
+
+    function showHomepageToast(message) {
+      const toast = document.getElementById('homepageToast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(homepageToastTimer);
+      homepageToastTimer = setTimeout(() => toast.classList.remove('show'), 6500);
+    }
+
+    function copyHomepageUrl() {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(homepageUrl);
+      }
+      const input = document.createElement('textarea');
+      input.value = homepageUrl;
+      input.setAttribute('readonly', '');
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      const copied = document.execCommand('copy');
+      input.remove();
+      return copied ? Promise.resolve() : Promise.reject(new Error('copy failed'));
+    }
+
+    function setAsHomepage() {
+      // 兼容仍支持 setHomePage 的旧版浏览器。
+      if (document.body && typeof document.body.setHomePage === 'function') {
+        document.body.setHomePage(homepageUrl);
+        showHomepageToast('已将万象导航设为浏览器首页。');
+        return;
+      }
+
+      const ua = navigator.userAgent;
+      let guide = '请在浏览器设置的“主页”或“启动时”选项中粘贴。';
+      if (/Edg\//.test(ua)) {
+        guide = '请打开 Edge 设置 → 开始、主页和新建标签页 → 打开以下页面，并粘贴网址。';
+      } else if (/Chrome\//.test(ua)) {
+        guide = '请打开 Chrome 设置 → 启动时 → 打开特定网页，并粘贴网址。';
+      } else if (/Firefox\//.test(ua)) {
+        guide = '请打开 Firefox 设置 → 主页 → 主页和新窗口，并粘贴网址。';
+      } else if (/Safari\//.test(ua)) {
+        guide = '请打开 Safari 设置 → 通用 → 主页，并粘贴网址。';
+      }
+
+      copyHomepageUrl()
+        .then(() => showHomepageToast('万象导航网址已复制。' + guide))
+        .catch(() => showHomepageToast('请复制 ' + homepageUrl + '，然后' + guide));
+    }
+
     function toggleMobileSidebar(forceClose = false) {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebarOverlay');
